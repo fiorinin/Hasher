@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="../node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/hasher.css">
+    <title>Hello World!</title>
+  </head>
+  <body>
+    <h1>Hello World!</h1>
+    <!-- All of the Node.js APIs are available in this renderer process. -->
+    We are using Node.js <script>document.write(process.versions.node)</script>,
+    Chromium <script>document.write(process.versions.chrome)</script>,
+    and Electron <script>document.write(process.versions.electron)</script>.
+
+    <div class="footer text-right">
+      <span id="version"></span>
+    </div>
+    <script>
+        window.jQuery = window.$ = require('jquery');
+    </script>
+    <script src="../node_modules/bootstrap/dist/js/bootstrap.js"></script>
+    <script>
+      require('./renderer.js')
+    </script>
+  </body>
+</html>
