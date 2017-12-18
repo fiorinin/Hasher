@@ -18,19 +18,28 @@
 
       <div class="row top-buffer">
         <div class="col-xs-5 col-xs-offset-1 text-center">
-          <button type="button" class="btn menu">Performance</button>
+          <button type="button" class="btn menu" id="performance">Performance</button>
         </div>
         <div class="col-xs-5  text-center">
-          <button type="button" class="btn menu">Pool</button>
+          <button type="button" class="btn menu" id="pool">Pool</button>
         </div>
       </div>
 
       <div class="row top-buffer">
         <div class="col-xs-5 col-xs-offset-1 text-center">
-          <button type="button" class="btn menu">Wallet</button>
+          <button type="button" class="btn menu" id="wallet">Wallet</button>
         </div>
-        <div class="col-xs-5  text-center">
-          <button type="button" class="btn menu">Donation</button>
+        <div class="col-xs-5 text-center">
+          <button type="button" class="btn menu" id="donation">Donation</button>
+        </div>
+      </div>
+
+      <div class="row top-buffer">
+        <div class="col-xs-5 col-xs-offset-1 info" id="estimate">
+          <h5>Estimated daily</h5>
+        </div>
+        <div class="col-xs-5 col-xs-offset-1 info" id="balance">
+          <h5>Balance</h5>
         </div>
       </div>
     </div>
@@ -44,7 +53,7 @@
     </script>
     <script src="../node_modules/bootstrap/dist/js/bootstrap.js"></script>
     <script>
-      require('./renderer.js')
+      require('./js/index.js')
     </script>
 
   </body>

@@ -23,13 +23,28 @@ function createWindow () {
     mainWindow.webContents.send('version', pjson.version)
   })
 
+  const {ipcMain} = require('electron')
+  ipcMain.on('changePage', (event, arg) => {
+    loadPage(arg)
+  })
+
   mainWindow.on('closed', function () {
     mainWindow = null
   })
 }
 
-app.on('ready', createWindow)
+function loadPage(pageName) {
+  page = "index"
+  if(pageName != "")
+    page = pageName
+  mainWindow.loadURL(url.format({
+    pathname: path.join(__dirname, 'template/'+page+'.html'),
+    protocol: 'file:',
+    slashes: true
+  }))
+}
 
+app.on('ready', createWindow)
 
 app.on('window-all-closed', function () {
   if (process.platform !== 'darwin') {
