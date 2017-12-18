@@ -5,11 +5,11 @@ const BrowserWindow = electron.BrowserWindow;
 const path = require('path')
 const url = require('url')
 
-require('electron-debug')({showDevTools: true});
+require('electron-debug')({showDevTools: false});
 let mainWindow
 
 function createWindow () {
-  mainWindow = new BrowserWindow({width: 1400, height: 700})
+  mainWindow = new BrowserWindow({width: 600, height: 400, resizable: false})
   mainWindow.setMenu(null)
   var pjson = require('./package.json');
 
