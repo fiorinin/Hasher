@@ -11,11 +11,23 @@
 
     <div class="container-fluid">
       <div class="row">
-        <div class="col-xs-4 text-center">
+        <div class="col-xs-4">
           <button type="button" class="btn" id="back">Back</button>
         </div>
       </div>
 
+      <div class="row top-buffer">
+        <div class="col-xs-12">
+          <h4>Enter your BTC address:</h4>
+          <div class="input-group">
+            <input type="text" class="form-control" id="wallet_address"/>
+            <span class="input-group-btn">
+              <button class="btn btn-primary" type="button" id="save_wallet">Save</button>
+            </span>
+          </div>
+          <div id="message"></div>
+        </div>
+      </div>
     </div>
 
     <div class="footer text-right">

@@ -1,0 +1,7 @@
+var miners = [
+  {}
+]
+
+var pools = [
+  {}
+]

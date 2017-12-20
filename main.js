@@ -5,7 +5,6 @@ const path = require('path')
 const url = require('url')
 const Store = require('electron-store');
 const store = new Store();
-const settings = new Store(name="settings");
 const GPU = require("./controls/gpu.js");
 const gpu = new GPU();
 
@@ -57,21 +56,11 @@ function loadPage(pageName) {
 // Settings initialization //
 var pjson = require('./package.json');
 store.set("version", pjson.version)
-if (typeof settings.get('intro') === 'undefined') {
-  settings.set("intro", true)
+if (typeof store.get('donation') === 'undefined') {
+  store.set("donation", 0.01)
 }
-if (typeof settings.get('donation') === 'undefined') {
-  settings.set("donation", 0.005)
-}
-if (typeof settings.get('pool') === 'undefined') {
-  var pool = {
-    'name': 'zpool',
-    'stratum': ''
-  }
-  settings.set("pool", pool)
-}
-if (typeof settings.get('balance') === 'undefined') {
-  settings.set("balance", 0)
+if (typeof store.get('balance') === 'undefined') {
+  store.set("balance", 0)
 }
 ////////////
 

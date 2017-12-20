@@ -139,3 +139,55 @@ a.list-group-item.active, a.list-group-item.active:hover, a.list-group-item.acti
 #cancel_bench {
   margin-top:20px;
 }
+
+.input-group-btn > .btn-primary {
+      border-radius: .25rem;
+      background-color: #4abdac;
+      border-color: #4abdac;
+}
+
+.text-primary {
+  color: #4abdac;
+}
+
+.text-alert {
+  color: #fc4a1a;
+}
+
+.or {
+  line-height: 35px;
+}
+
+#balance h5, #estimate h5 {
+  margin-bottom:0;
+  padding-bottom:0;
+}
+
+.balance {
+  margin-top:0;
+  font-size: 16px;
+  font-family: "Arial";
+}
+
+.balance small {
+  font-size:10px;
+}
+
+.vertical-align {
+    display: flex;
+    align-items: center;
+}
+
+#btceur, #btcusd {
+  font-family: "Arial";
+  font-size:8px;
+}
+
+.pretty {
+  margin-right:.8em;
+}
+
+.pright {
+  margin-right:0;
+  margin-left:.6em;
+}
