@@ -1,16 +1,15 @@
 const Store = require('electron-store');
 const store = new Store();
+const ipcRenderer = require('electron').ipcRenderer;
+
+ipcRenderer.on("gpus", function(e,d) {
+  if (d == "ok") {
+    updateGPUs();
+  }
+})
 
 var selected = [];
-
-var gpus = store.get('gpus');
-for (var id in gpus) {
-  var dis = 'disabled';
-  if (typeof store.get('bench') !== 'undefined' && typeof store.get('bench')[id] !== 'undefined') {
-    dis = ""
-  }
-  $("#gpuList").append("<a href='#' class='list-group-item list-group-item-action' id='gpuid_"+id+"'>"+gpus[id]+"<span class='pull-right'><button class='btn btn-xs secondary "+dis+"'>Stats</button></span></a>")
-}
+updateGPUs();
 
 $(".list-group-item").click(function() {
   $(this).toggleClass("active");
@@ -68,3 +67,17 @@ $("#cancel_bench").click(function() {
     $(".loadpopup").addClass("hidden");
   });
 })
+
+function updateGPUs() {
+  var gpus = store.get('gpus');
+  if(gpus !== undefined && gpus.length > 0) {
+    $("#gpuList").html("");
+  }
+  for (var id in gpus) {
+    var dis = 'disabled';
+    if (typeof store.get('bench') !== 'undefined' && typeof store.get('bench')[id] !== 'undefined') {
+      dis = ""
+    }
+    $("#gpuList").append("<a href='#' class='list-group-item list-group-item-action' id='gpuid_"+id+"'>"+gpus[id]+"<span class='pull-right'><button class='btn btn-xs secondary "+dis+"'>Stats</button></span></a>")
+  }
+}

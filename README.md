@@ -8,3 +8,10 @@ cd Hasher
 npm install
 npm start
 ```
+
+## Dev pull
+```
+git pull
+npm install
+npm start
+```

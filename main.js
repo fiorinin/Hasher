@@ -14,7 +14,8 @@ require('electron-debug')({showDevTools: false});
 // GUI ///////
 function createWindow () {
   gpu.detect().then(function(gpus){
-    store.set("gpus", gpus)
+    store.set("gpus", gpus);
+    mainWindow.webContents.send('gpus', "ok");
   })
   mainWindow = new BrowserWindow({width: 600, height: 400, resizable: false});
   mainWindow.setMenu(null);
