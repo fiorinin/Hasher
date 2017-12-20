@@ -9,7 +9,7 @@ const GPU = require("./controls/gpu.js");
 const gpu = new GPU();
 
 let mainWindow
-require('electron-debug')({showDevTools: true});
+require('electron-debug')({showDevTools: false});
 
 // GUI ///////
 function createWindow () {
