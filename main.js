@@ -6,15 +6,19 @@ const url = require('url')
 const Store = require('electron-store');
 const store = new Store();
 const settings = new Store(name="settings");
+const GPU = require("./controls/gpu.js");
+const gpu = new GPU();
 
 let mainWindow
-require('electron-debug')({showDevTools: false});
+require('electron-debug')({showDevTools: true});
 
 // GUI ///////
 function createWindow () {
-  mainWindow = new BrowserWindow({width: 600, height: 400, resizable: false})
-  mainWindow.setMenu(null)
-  var pjson = require('./package.json');
+  gpu.detect().then(function(gpus){
+    store.set("gpus", gpus)
+  })
+  mainWindow = new BrowserWindow({width: 600, height: 400, resizable: false});
+  mainWindow.setMenu(null);
 
   mainWindow.loadURL(url.format({
     pathname: path.join(__dirname, './template/index.html'),
@@ -22,9 +26,10 @@ function createWindow () {
     slashes: true
   }))
 
-  mainWindow.webContents.on('did-finish-load', () => {
-    mainWindow.webContents.send('version', pjson.version)
-  })
+  // ipc example
+  // mainWindow.webContents.on('did-finish-load', () => {
+  //   mainWindow.webContents.send('version', pjson.version);
+  // })
 
   const {ipcMain} = require('electron')
   ipcMain.on('changePage', (event, arg) => {
@@ -37,9 +42,9 @@ function createWindow () {
 }
 
 function loadPage(pageName) {
-  page = "index"
+  page = "index";
   if(pageName != "") {
-    page = pageName
+    page = pageName;
   }
   mainWindow.loadURL(url.format({
     pathname: path.join(__dirname, './template/'+page+'.html'),
@@ -50,6 +55,8 @@ function loadPage(pageName) {
 ////////////
 
 // Settings initialization //
+var pjson = require('./package.json');
+store.set("version", pjson.version)
 if (typeof settings.get('intro') === 'undefined') {
   settings.set("intro", true)
 }

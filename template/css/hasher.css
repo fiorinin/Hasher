@@ -33,7 +33,7 @@ body {
 
 .btn {
   border-radius: 0;
-  box-shadow:inset 0 0 0 99999px rgba(255,255,255,0.2);
+  box-shadow:inset 0 0 0 99999px rgba(0,0,0,0.03);
 }
 
 .btn:hover {
@@ -54,7 +54,7 @@ body {
   font-size:16px;
   border-radius: 50%;
   border: 2px solid #ffffff;
-  box-shadow: inset 0 0 0 99999px rgba(0,0,0,0.02), 0 0 0 2px #4abdac;
+  box-shadow: inset 0 0 0 99999px rgba(0,0,0,0.03), 0 0 0 2px #4abdac;
 }
 
 #hash:active {
@@ -87,4 +87,55 @@ body {
 
 #balance {
   background-color: #fc4a1a;
+}
+
+.btn.primary, .btn.secondary, .btn.tertiary {
+  color: #ffffff;
+  border: 0;
+}
+
+.btn.primary:hover {
+  box-shadow:0;
+}
+
+.btn.primary {
+  background-color: #4abdac;
+}
+
+.btn.secondary {
+  background-color: #fc4a1a;
+}
+
+.btn.tertiary {
+  background-color: #f7b733;
+}
+
+a.list-group-item.active, a.list-group-item.active:hover, a.list-group-item.active:focus {
+  background-color: #4abdac;
+  border-color: #4abdac;
+}
+
+.loadpopup {
+  top:0;
+  left:0;
+  position: fixed;
+  width: 600px;
+  height: 354px;
+  background-color: #ffffff;
+  z-index:10;
+}
+
+.loadpopup .row {
+  margin-top: 70px;
+}
+
+#progress {
+  position: relative;
+  margin: auto;
+  height: 100px;
+  width: 100px;
+}
+
+#cancel_bench {
+  margin-top:20px;
 }
