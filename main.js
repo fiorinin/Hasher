@@ -1,3 +1,4 @@
+var config = require("./config");
 var electron = require('electron');
 const app = electron.app;
 const BrowserWindow = electron.BrowserWindow;
@@ -9,7 +10,7 @@ const GPU = require("./controls/gpu.js");
 const gpu = new GPU();
 
 let mainWindow
-require('electron-debug')({showDevTools: false});
+require('electron-debug')({showDevTools: config.debug});
 
 // GUI ///////
 function createWindow () {
@@ -17,7 +18,7 @@ function createWindow () {
     store.set("gpus", gpus);
     mainWindow.webContents.send('gpus', "ok");
   })
-  mainWindow = new BrowserWindow({width: 600, height: 400, resizable: false});
+  mainWindow = new BrowserWindow({width: 600, height: 400, resizable: config.debug});
   mainWindow.setMenu(null);
 
   mainWindow.loadURL(url.format({
@@ -58,11 +59,28 @@ function loadPage(pageName) {
 var pjson = require('./package.json');
 store.set("version", pjson.version)
 if (typeof store.get('donation') === 'undefined') {
-  store.set("donation", 0.01)
+  store.set("donation", 0.01);
 }
 if (typeof store.get('balance') === 'undefined') {
-  store.set("balance", 0)
+  store.set("balance", 0);
 }
+if (typeof store.get('selectedPools') === 'undefined') {
+  store.set("selectedPools", []);
+}
+if (typeof store.get('langPools') === 'undefined') {
+  var langPools = [];
+  for(var idx in config.pools) {
+    if(config.pools[idx].regions !== undefined) {
+      pregions = [];
+      for (var ridx in config.pools[idx].regions) {
+        pregions.push(0);
+      }
+      langPools.push(pregions);
+    }
+  }
+  store.set("langPools", langPools);
+}
+store.set("config", config);
 ////////////
 
 // App /////

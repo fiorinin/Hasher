@@ -1,4 +1,8 @@
-var miners = [
+var config = {}
+
+config.debug = false;
+
+config.miners = [
   {}
 ]
 
@@ -17,14 +21,17 @@ var miners = [
 		"rental_current": "3.61922463"
 	},
   */
-var pools = [
+config.pools = [
   {
     "name": "zpool",
-    "regions": ["us", "eu", "asia"],
-    "base_URL": "mine.zpool.ca",
+    // "regions": [["US","us"], ["EU","eu"], ["Asia","asia"]],
+    "home_URL": "http://www.zpool.ca/",
+    "mine_URL": "mine.zpool.ca",
     "API_URL": "http://www.zpool.ca/api/",
     "API_status": "status",
     "API_wallet": "wallet?address=",
     "currency": "btc"
   }
 ]
+
+module.exports = config;

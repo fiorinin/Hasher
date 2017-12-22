@@ -1,4 +1,4 @@
-const {ipcRenderer} = require('electron')
+const {ipcRenderer} = require('electron');
 const Store = require('electron-store');
 const store = new Store();
 
@@ -20,7 +20,6 @@ if (pref_cur == "usd") {
 
 updateCurrency();
 
-
 $("#curusd").change(function() {
   store.set("pref_cur", "usd");
   updateCurrency();
@@ -32,7 +31,7 @@ $("#cureur").change(function() {
 })
 
 // Fetch BTC value
-function loadBTCVal() {
+function updateCurrency() {
   var url = 'https://api.coindesk.com/v1/bpi/currentprice.json';
   var https = require('https');
   https.get(url, function(res) {
@@ -48,6 +47,7 @@ function loadBTCVal() {
           store.set("btceur", Math.round(response.bpi.EUR.rate_float));
           $("#btcusd").text("1BTC = "+store.get("btcusd")+"USD");
           $("#btceur").text("1BTC = "+store.get("btceur")+"EUR");
+          updateBTC();
       });
   })
 }
@@ -59,9 +59,4 @@ function updateBTC() {
   } else {
     $("#balance_cur").html(store.get("balance")*store.get("btceur")+" <small id='balance_val'><spanclass='curr'>EUR</span></small>");
   }
-}
-
-function updateCurrency() {
-  loadBTCVal();
-  updateBTC();
 }

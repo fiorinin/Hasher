@@ -3,6 +3,7 @@
   <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="../node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../node_modules/pretty-checkbox/dist/pretty-checkbox.min.css">
     <link href="https://fonts.googleapis.com/css?family=Raleway" rel="stylesheet">
     <link rel="stylesheet" href="css/hasher.css">
     <title>Hasher</title>
@@ -11,11 +12,20 @@
 
     <div class="container-fluid">
       <div class="row">
-        <div class="col-xs-4 text-center">
+        <div class="col-xs-4">
           <button type="button" class="btn" id="back">Back</button>
         </div>
       </div>
 
+      <div class="row top-buffer">
+        <div class="col-xs-12">
+          <h4>Pools</h4>
+          <p>Hasher comes with various options for pool mining. You can select one or multiple of them, and Hasher will mine on the most profitable one among your selection.</p>
+          <ul class="list-group" id="poolList">
+
+          </ul>
+        </div>
+      </div>
     </div>
 
     <div class="footer text-right">
@@ -28,7 +38,7 @@
     <script src="../node_modules/bootstrap/dist/js/bootstrap.js"></script>
     <script>
       require('./js/settings.js')
-        require('./js/pool.js')
+      require('./js/pool.js')
     </script>
 
   </body>
