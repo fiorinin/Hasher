@@ -1,6 +1,6 @@
 {
   "name": "Hasher",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "A simple GUI integrating multiple miners for a simple and effective mining experience.",
   "main": "main.js",
   "scripts": {
@@ -20,6 +20,7 @@
     "electron": "^1.7.9"
   },
   "dependencies": {
+    "adm-zip": "^0.4.7",
     "app": "^0.1.0",
     "bootstrap": "^3.3.7",
     "electron-debug": "^1.4.0",
@@ -30,6 +31,7 @@
     "nuts": "^0.25.0",
     "pretty-checkbox": "^3.0.3",
     "progressbar.js": "^1.0.1",
+    "request": "^2.83.0",
     "wallet-address-validator": "^0.1.1"
   }
 }

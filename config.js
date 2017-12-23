@@ -1,9 +1,14 @@
 var config = {}
 
-config.debug = false;
+config.debug = true;
 
 config.miners = [
-  {}
+  {
+    "name": "ccminer",
+    "URL": "https://github.com/nicehash/ccminer-nanashi/releases/download/1.7.6-r6/ccminer.zip",
+    "folder": "lyra2rev2-ccminer/",
+    "algos": ['blake','blakecoin','blake2s','bmw','c11','flax','decred','deep','dmd-gr','fresh','fugue256','groestl','heavy','jackpot','keccak','luffa','lyra2','mjollnir','myr-gr','neoscrypt','nist5','penta','quark','qubit','scrypt','scrypt:N','scrypt-jane','s3','sib','skein','skein2','x11','x14','x15','x17','vanilla','whirlpool','zr5']
+  }
 ]
 
 /* Example of API output
@@ -32,6 +37,11 @@ config.pools = [
     "API_wallet": "wallet?address=",
     "currency": "btc"
   }
+]
+
+// I think I need a translation table for algos...
+config.algos = [
+  {}
 ]
 
 module.exports = config;
