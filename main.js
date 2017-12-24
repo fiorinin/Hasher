@@ -38,6 +38,7 @@ function createWindow () {
   })
 
   mainWindow.on('closed', function () {
+    // TODO: kill mining child process
     mainWindow = null
   })
 }
@@ -66,6 +67,18 @@ if (typeof store.get('balance') === 'undefined') {
 }
 if (typeof store.get('selectedPools') === 'undefined') {
   store.set("selectedPools", []);
+}
+if (typeof store.get('benchtime') === 'undefined') {
+  store.set("benchtime", 120000);
+}
+if (typeof store.get('gpus_to_use') === 'undefined') {
+  store.set("gpus_to_use", []);
+}
+if (typeof store.get('benched') === 'undefined') {
+  store.set("benched", {});
+}
+if (typeof store.get('enabled_algos') === 'undefined') {
+  store.set("enabled_algos", {});
 }
 if (typeof store.get('langPools') === 'undefined') {
   var langPools = [];

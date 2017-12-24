@@ -18,6 +18,7 @@ module.exports = class GPU {
 
           function getLinuxInfo() {
               // TODO. Not tested yet.
+              // Won't support UNIX mining for now.
               exec('sudo lshw -C display', (error, stdout, stderr) => {
                   if (error) {
                       console.error(` - exec error: ${error}`);
@@ -30,6 +31,7 @@ module.exports = class GPU {
           function getMacInfo() {
               // Tested but clunky, not sure mining on OSX is a thing, anyway...
               // Currently detects only one GPU
+              // EDIT: Won't support OSX mining for now.
               exec('system_profiler | grep -A2 Graphics/Displays', (error, stdout, stderr) => {
                   if (error) {
                       console.error(` - exec error: ${error}`);

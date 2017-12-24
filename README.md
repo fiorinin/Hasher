@@ -18,3 +18,6 @@ git pull
 npm install
 npm start
 ```
+
+### Notes to self
+CUDA 9 binaries require a nvidia driver 384.xx or more recent

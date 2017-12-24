@@ -9,7 +9,7 @@ for (var id in pools) {
   if (selectedPools.indexOf(id) !== -1) {
     checked = "checked";
   }
-  $("#poolList").append("<li class='list-group-item' id='listid_"+id+"'><a href='"+pool.home_URL+"'>"+pool.name+"</a><span class='pull-right'><div class='pretty p-icon p-jelly'><input class='pool' id='poolid_"+id+"' type='checkbox' "+checked+"/><div class='state p-primary-o'><i class='icon glyphicon glyphicon-star'></i><label></label></div></div></span></li>");
+  $("#poolList").append("<li class='list-group-item' id='listid_"+id+"'><a href='"+pool.home_URL+"'>"+pool.name+"</a><span class='pull-right'><div class='pretty p-icon p-jelly p-plain'><input class='pool' id='poolid_"+id+"' type='checkbox' "+checked+"/><div class='state p-primary-o'><i class='icon glyphicon glyphicon-star'></i><label></label></div></div></span></li>");
   var langs = store.get("langPools")[id];
   if(pool.regions > 0) {
     $("#listid_"+id).append("<span class='regions' id='regionid_"+id+"'>Regions:&nbsp;</span>");

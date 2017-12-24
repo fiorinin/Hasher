@@ -115,7 +115,7 @@ a.list-group-item.active, a.list-group-item.active:hover, a.list-group-item.acti
   border-color: #4abdac;
 }
 
-.loadpopup {
+.loadpopup, .statspopup {
   top:0;
   left:0;
   position: fixed;
@@ -194,4 +194,17 @@ a.list-group-item.active, a.list-group-item.active:hover, a.list-group-item.acti
 
 .regions {
   margin-left:50px;
+}
+
+#gpustats {
+  font-family: "rawline", sans-serif;
+  font-weight: 300;
+}
+
+.nvidia.pretty input:checked~.state.p-success label {
+    color: #5cb85c;
+}
+
+.amd.pretty input:checked~.state.p-danger label {
+    color: #d9534f;
 }

@@ -4,10 +4,16 @@ config.debug = true;
 
 config.miners = [
   {
-    "name": "ccminer",
-    "URL": "https://github.com/nicehash/ccminer-nanashi/releases/download/1.7.6-r6/ccminer.zip",
-    "folder": "lyra2rev2-ccminer/",
-    "algos": ['blake','blakecoin','blake2s','bmw','c11','flax','decred','deep','dmd-gr','fresh','fugue256','groestl','heavy','jackpot','keccak','luffa','lyra2','mjollnir','myr-gr','neoscrypt','nist5','penta','quark','qubit','scrypt','scrypt:N','scrypt-jane','s3','sib','skein','skein2','x11','x14','x15','x17','vanilla','whirlpool','zr5']
+    "name": "ccminerTPruvot",
+    "exe": "ccminer-64"
+    "hardware": "nvidia",
+    "URL": "https://github.com/tpruvot/ccminer/releases/download/2.2.3-tpruvot/ccminer-x64-2.2.3-cuda9.7z",
+    "folder": "ccminerTPruvot/",
+    "algos": ["bitcore","blake2s","blakecoin","vanilla","c11","cryptonight","decred","equihash","groestl","hmq1725","jha","keccak","lbry","lyra2v2","lyra2z","myr-gr","neoscrypt","nist5","pascal","phi","sia","sib","skein","skunk","timetravel","tribus","veltor","x11evo","x17"]
+  },
+  {
+    "name": "ccminerAlexis78",
+    "algos": ["hsr","blake2s","blakecoin","veltor","lyra2v2","myr-gr","nist5","sib","skein","c11","x17"]
   }
 ]
 

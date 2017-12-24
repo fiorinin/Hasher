@@ -3,7 +3,9 @@
   <head>
     <meta charset="UTF-8">
     <link rel="stylesheet" href="../node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../node_modules/pretty-checkbox/dist/pretty-checkbox.min.css">
     <link href="https://fonts.googleapis.com/css?family=Raleway" rel="stylesheet">
+    <link href="https://cdn.rawgit.com/h-ibaldo/Raleway_Fixed_Numerals/master/css/rawline.css" rel="stylesheet">
     <link rel="stylesheet" href="css/hasher.css">
     <title>Hasher</title>
   </head>
@@ -37,6 +39,27 @@
             <div id="progress"></div>
             <small class="text-alert" id="error"></small>
             <button class="btn secondary" id="cancel_bench">Cancel benchmark</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="statspopup hidden">
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-xs-12">
+            <h4 id="gpuname"></h4>
+            <table id="gpustats" class="table table-sm">
+              <thead>
+                <tr>
+                  <th scope="col">Algorithm</th>
+                  <th scope="col">Hashrate</th>
+                  <th scope="col">Enabled</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+            <button class="btn secondary" id="closeStats">Close</button>
           </div>
         </div>
       </div>
