@@ -18,7 +18,7 @@ function createWindow () {
     store.set("gpus", gpus);
     mainWindow.webContents.send('gpus', "ok");
   })
-  mainWindow = new BrowserWindow({width: 600, height: 400, resizable: config.debug});
+  mainWindow = new BrowserWindow({width: 600, height: 440, resizable: config.debug});
   mainWindow.setMenu(null);
 
   mainWindow.loadURL(url.format({
@@ -59,6 +59,9 @@ function loadPage(pageName) {
 // Settings initialization //
 var pjson = require('./package.json');
 store.set("version", pjson.version)
+if (typeof store.get('intro') === 'undefined') {
+  store.set("intro", false);
+}
 if (typeof store.get('donation') === 'undefined') {
   store.set("donation", 0.01);
 }

@@ -115,14 +115,19 @@ a.list-group-item.active, a.list-group-item.active:hover, a.list-group-item.acti
   border-color: #4abdac;
 }
 
-.loadpopup, .statspopup {
+.loadpopup, .statspopup, .algopopup {
   top:0;
   left:0;
   position: fixed;
   width: 600px;
-  height: 354px;
+  height: 404px;
   background-color: #ffffff;
   z-index:10;
+  overflow: auto;
+}
+
+.algopopup {
+  padding-bottom: 20px;
 }
 
 .loadpopup .row {

@@ -23,13 +23,6 @@ for (var id in pools) {
   }
 }
 
-// Open links in browser
-const shell = require('electron').shell;
-$(document).on('click', 'a[href^="http"]', function(event) {
-    event.preventDefault();
-    shell.openExternal(this.href);
-});
-
 $(".pool").change(function() {
   var poolid = $(this).attr("id").replace("poolid_", "");
   var idx = selectedPools.indexOf(poolid);

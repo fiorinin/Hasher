@@ -15,10 +15,14 @@
         <div class="col-xs-4">
           <button type="button" class="btn" id="back">Back</button>
         </div>
+        <div class="col-xs-offset-4 col-xs-4 text-right">
+          <button type="button" class="btn" id="next">Next</button>
+        </div>
       </div>
 
-      <div class="row top-buffer">
+      <div class="row">
         <div class="col-xs-12">
+          <small class="text-alert" id="intro_errors"></small>
           <h4>BTC address</h4>
           <div class="input-group">
             <input type="text" class="form-control" id="wallet_address"/>
@@ -26,7 +30,7 @@
               <button class="btn btn-primary" type="button" id="save_wallet">Save</button>
             </span>
           </div>
-          <div id="message"></div>
+          <small id="message"></small>
         </div>
       </div>
 
@@ -53,7 +57,7 @@
       <div class="row top-buffer">
         <div class="col-xs-12">
           <h4>Benchmark speed </h4>
-          <small>The slower the more accurate the profit estimation will be.</small>
+          <small>The slower the more accurate the profit estimates will be. The time estimates below correspond the maximum time per GPU (assuming you benchmark on all eligible algorithms).</small>
           <div class="input-group">
             <div class="pretty p-icon p-curve p-smooth p-plain">
                 <input id="fast" type="radio" name="speed" />

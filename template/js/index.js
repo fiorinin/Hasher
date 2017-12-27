@@ -1,6 +1,7 @@
 const {ipcRenderer} = require('electron');
 const Store = require('electron-store');
 const store = new Store();
+var https = require('https');
 
 $("#version").text("Hasher v"+store.get("version"))
 $(".menu").click(function() {
@@ -33,7 +34,6 @@ $("#cureur").change(function() {
 // Fetch BTC value
 function updateCurrency() {
   var url = 'https://api.coindesk.com/v1/bpi/currentprice.json';
-  var https = require('https');
   https.get(url, function(res) {
       var body = '';
 
@@ -59,4 +59,9 @@ function updateBTC() {
   } else {
     $("#balance_cur").html(store.get("balance")*store.get("btceur")+" <small id='balance_val'><spanclass='curr'>EUR</span></small>");
   }
+}
+
+// Go to introduction if first time
+if(store.get("intro") == false) {
+  ipcRenderer.send('changePage', "intro");
 }

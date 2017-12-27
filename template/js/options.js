@@ -9,6 +9,8 @@ if (wal !== undefined) {
 }
 
 $("#save_wallet").click(function() {
+  $("#message").removeClass("text-primary");
+  $("#message").removeClass("text-alert");
   var wal = $("#wallet_address").val();
   var valid = WAValidator.validate(wal);
   if (valid) {
@@ -21,22 +23,26 @@ $("#save_wallet").click(function() {
   }
 })
 
-$("#nvidia").change(function() {
-  if($(this).is(":checked"))
-    store.set("hardware", "nvidia");
-  // TODO: update estimates for benchmark
-})
-
-$("#amd").change(function() {
-  if($(this).is(":checked"))
-    store.set("hardware", "amd");
-  // TODO: update estimates for benchmark
-})
-
+// Can be optimized, but later...
 var hardware = store.get("hardware");
 if (hardware !== undefined) {
   $(`#${hardware}`).prop("checked", true);
 }
+$("#nvidia").change(function() {
+  if($(this).is(":checked")) {
+    hardware = "nvidia";
+    store.set("hardware", hardware);
+  }
+  reloadSpeeds();
+})
+
+$("#amd").change(function() {
+  if($(this).is(":checked")) {
+    hardware = "amd";
+    store.set("hardware", hardware);
+  }
+  reloadSpeeds();
+});
 
 var benchtime = store.get("benchtime");
 if(benchtime < 120000) {
@@ -62,18 +68,52 @@ $("#slow").change(function() {
     store.set("benchtime", 180000)
 })
 
-$(".speed").each(function() {
-  var speed = $(this).parent().parent().prev().attr("id");
-  var nbalgos = 0;
-  var miners = config.miners;
-  for(var midx in miners) { nbalgos += miners[midx].algos.length; }
-  if(speed == "slow") {
-    $(this).text(" (~"+nbalgos*3+"mins)");
+function reloadSpeeds() {
+  $(".speed").each(function() {
+    var speed = $(this).parent().parent().prev().attr("id");
+    var nbalgos = 0;
+    var miners = config.miners;
+    if(hardware !== undefined) {
+      for(var midx in miners) {
+        var miner = miners[midx];
+        if (miner.hardware == hardware) {
+          nbalgos += miners[midx].algos.length;
+        }
+      }
+      if(speed == "slow") {
+        $(this).text(" (~"+nbalgos*3+"mins)");
+      }
+      if(speed == "regular") {
+        $(this).text(" (~"+nbalgos*2+"mins)");
+      }
+      if(speed == "fast") {
+        $(this).text(" (~"+nbalgos+"mins)");
+      }
+    }
+  })
+}
+reloadSpeeds();
+
+// Intro section
+if(store.get("intro") == false) {
+  $("#back").hide();
+} else{
+  $("#next").hide();
+}
+
+$("#next").click(function() {
+  $("#intro_errors").html("");
+  var err = false;
+  if(store.get("wallet") === undefined) {
+    $("#intro_errors").append("You need to enter and save your BTC address.<br>");
+    err = true;
   }
-  if(speed == "regular") {
-    $(this).text(" (~"+nbalgos*2+"mins)");
+  if(store.get("hardware") === undefined) {
+    $("#intro_errors").append("You need to select your hardware.<br>");
+    err = true;
   }
-  if(speed == "fast") {
-    $(this).text(" (~"+nbalgos+"mins)");
+  if(!err) {
+    const {ipcRenderer} = require('electron');
+    ipcRenderer.send('changePage', "performance");
   }
-})
+});

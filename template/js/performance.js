@@ -1,10 +1,10 @@
 const Store = require('electron-store');
 const store = new Store();
-var config = store.get("config");
 const ipcRenderer = require('electron').ipcRenderer;
 const remote = require('electron').remote;
 const app = remote.app;
 var AdmZip = require('adm-zip');
+var _7z = require('7zip')['7z']
 var request = require('request');
 var fs   = require('fs');
 var spawn = require('child_process').spawn;
@@ -12,7 +12,18 @@ const async = require('async');
 const MiningUtils = require("../../controls/miningutils.js");
 const mutils = new MiningUtils();
 var cancelBenchmark = false;
-var binPath = app.getPath('userData') +"/bin/";
+const binPath = app.getPath('userData') +"/bin/";
+var fse = require('fs-extra');
+
+// Some global settings
+var config = store.get("config");
+var miners = config.miners;
+var hardware = store.get("hardware");
+var gpus_to_use = store.get("gpus_to_use");
+var enabled_algos = store.get("enabled_algos");
+var wallet = store.get("wallet");
+var spools = store.get("selectedPools");
+var benchtime = store.get("benchtime");
 
 // Detect GPUs can take a while and is handled backend
 ipcRenderer.on("gpus", function(e,d) {
@@ -21,26 +32,26 @@ ipcRenderer.on("gpus", function(e,d) {
   }
 })
 
-// Declare GPUs to use, list them
-var selected = store.get("gpus_to_use");
+// Display GPUs
 updateGPUs();
 
 // (De)select GPUs
-$(".list-group-item").click(function() {
+$(".list-group-item").click(function(e) {
   $(this).toggleClass("active");
   var gpuid = parseInt($(this).attr('id').replace("gpuid_", ""));
-  var idx = $.inArray(gpuid, selected);
+  var idx = $.inArray(gpuid, gpus_to_use);
   if (idx == -1) {
-    selected.push(gpuid);
+    gpus_to_use.push(gpuid);
   } else {
-    selected.splice(idx, 1);
+    gpus_to_use.splice(idx, 1);
   }
-  if (selected.length > 0) {
+  if (gpus_to_use.length > 0) {
     $("#benchmark").removeClass("disabled");
   } else if (!$("#benchmark").hasClass("disabled")){
     $("#benchmark").addClass("disabled");
   }
-  store.set("gpus_to_use", selected);
+  store.set("gpus_to_use", gpus_to_use);
+  e.preventDefault();
 })
 
 // A lot of lines is the price of a nice progress bar...
@@ -70,6 +81,7 @@ var bar = new ProgressBar.Circle($("#progress")[0], {
   }
 });
 bar.text.style.fontSize = '2rem';
+bar.currentValue = 0;
 
 // Cancel benchmark consists of flagging the execution and hide benchmark
 $("#cancel_bench").click(function() {
@@ -80,15 +92,19 @@ $("#cancel_bench").click(function() {
 
 // Stats popup
 $(".stats").click(function(event) {
+  if ($(this).hasClass("disabled")) {
+    return false;
+  }
+  // TODO: manage algos before first bench
   event.stopPropagation();
   var gpuid = $(this).attr("id").replace("stats_", "");
   $("#gpuname").html("Statistics for GPU #"+gpuid);
   var stats = store.get("benched")[gpuid];
   $("#gpustats>tbody").html("");
+  // Todo: wrong, for all algos available for this hardware...
   for (stat in stats) {
     var hr = mutils.pprint(stats[stat]);
     var checked = "";
-    var enabled_algos = store.get("enabled_algos");
     if(enabled_algos[stat] === undefined){
       enabled_algos[stat] = true;
       store.set("enabled_algos", enabled_algos);
@@ -97,13 +113,13 @@ $(".stats").click(function(event) {
       checked = "checked";
     }
     var checkbox = `<div class="pretty p-icon p-jelly">
-                      <input type="checkbox" class="ealgo" id="enable_${stat}" ${checked}/>
+                      <input type="checkbox" class="ealgo enable_${stat}" ${checked}/>
                         <div class="state p-primary-o">
                             <i class="icon glyphicon glyphicon-check"></i>
                             <label></label>
                         </div>
                     </div>`
-    $("#gpustats>tbody").append("<tr><td>"+stat+"</td><td>"+hr+"</td><td>"+checkbox+"<td></tr></li>");
+    $("#gpustats>tbody").append("<tr><td>"+stat+"</td><td>"+hr+"</td><td>"+checkbox+"<td></tr>");
   }
   $(".statspopup").removeClass("hidden");
 });
@@ -111,12 +127,9 @@ $(".stats").click(function(event) {
 // Enable/disable algos
 $(document.body).on('change', '.ealgo' ,function(){
   var algo = $(this).attr("id").split("_")[1];
-  var enabled_algos = store.get(enabled_algos);
-  if($(this).is(":checked")) {
-    enabled_algos[algo] = true;
-  } else {
-    enabled_algos[algo] = false;
-  }
+  enabled_algos[algo] = $(this).is(":checked");
+  // Update all similar checkboxes
+  $(`.enable_${algo}`).prop('checked', $(this).is(":checked"));
   store.set("enabled_algos", enabled_algos);
 })
 
@@ -125,24 +138,71 @@ $("#closeStats").click(function() {
   $(".statspopup").addClass("hidden");
 })
 
+// Algorithm popup
+$("#pick_algos").click(function(event) {
+  $(".algopopup").removeClass("hidden");
+});
+
+// Fill it with relevant algos
+listedAlgos = [];
+for (var i = 0; i < miners.length; i++) {
+  var miner = miners[i];
+  if(miner.hardware == hardware) {
+    for(var j = 0; j < miner.algos.length; j++) {
+      var algo = miner.algos[j];
+      if(listedAlgos.indexOf(algo) == -1) {
+        listedAlgos.push(algo);
+      }
+    }
+  }
+}
+listedAlgos.sort();
+for(var i = 0; i < listedAlgos.length; i++) {
+  var algo = listedAlgos[i];
+  var checked = "";
+  if(enabled_algos[algo] === undefined){
+    enabled_algos[algo] = true;
+    store.set("enabled_algos", enabled_algos);
+  }
+  if(enabled_algos[algo] == true) {
+    checked = "checked";
+  }
+  var checkbox = `<div class="pretty p-icon p-jelly">
+                    <input type="checkbox" class="ealgo enable_${algo}" ${checked}/>
+                      <div class="state p-primary-o">
+                          <i class="icon glyphicon glyphicon-check"></i>
+                          <label></label>
+                      </div>
+                  </div>`
+  if(i % 2 == 0) {
+    $("#algos>tbody").append(`<tr><td>${algo}</td><td>${checkbox}</td></tr>`);
+  } else {
+    $("#algos>tbody>tr:last").append(`<td>${algo}</td><td>${checkbox}</td>`);
+  }
+}
+
+// Close algos popup
+$("#closeAlgos").click(function() {
+  $(".algopopup").addClass("hidden");
+})
+
 // Click on benchmark: DL miners first and verify requirements
+var doneMiner;
 $("#benchmark").click(function() {
   if ($(this).hasClass("disabled")) {
     return false;
   }
   $(".loadpopup").removeClass("hidden");
+  doneMiner = 0;
 
   // First, check miners are here and if not, download
   $("#action").text("Downloading miners...");
-  var miners = config.miners;
   var increment = 1/miners.length;
   var barval = 0;
-  var doneMiner = 0;
   var promises = [];
   for(var idx in miners) {
     var miner = miners[idx];
     // Only eligible miners
-    var hardware = store.get("hardware");
     if (miner.hardware != hardware) {
       continue;
     }
@@ -154,21 +214,11 @@ $("#benchmark").click(function() {
       if (!fs.existsSync(binPath+miner.folder)) {
         fs.mkdirSync(binPath+miner.folder);
       }
-      request(miner.URL)
-          .pipe(fs.createWriteStream(binPath+miner.folder+miner.name+".zip"))
-          .on('close', function () {
-            barval += increment*0.8;
-            bar.animate(barval);
-            var zip = new AdmZip(binPath+miner.folder+miner.name+".zip");
-            zip.extractAllTo(binPath+miner.folder, true);
-            barval += increment*0.2;
-            bar.animate(barval);
-            doneMiner += 1;
-            if(doneMiner == miners.length) {
-              benchmark();
-            }
-          });
+      console.log(`I miss ${binPath+miner.folder+miner.name}.exe`)
+      fetchAndUnzip(miner,increment);
     } else {
+      bar.currentValue += increment;
+      bar.animate(bar.currentValue);
       doneMiner += 1;
       if(doneMiner == miners.length) {
         benchmark();
@@ -177,58 +227,109 @@ $("#benchmark").click(function() {
   }
 })
 
-// Actual benchmark happens here...
+// Fetch and unzip a file
+function fetchAndUnzip(miner,increment) {
+  var splitURL = miner.URL.split("/");
+  var zipfile = splitURL[splitURL.length-1];
+  var path = binPath+miner.folder;
+  request(miner.URL)
+  .pipe(fs.createWriteStream(path+zipfile))
+  .on('close', function () {
+    bar.currentValue += increment*0.8;
+    var validate = increment*0.2;
+    bar.animate(bar.currentValue);
+    if(zipfile.includes(".zip")){
+      var zip = new AdmZip(path+zipfile);
+      zip.extractAllTo(path, true);
+      DLComplete(validate,miner);
+    } else if(zipfile.includes(".7z")) {
+      var task = spawn(_7z, ['x', path+zipfile, '-o'+path, '-y']);
+      task.on('close', (code) => {
+        DLComplete(validate,miner);
+      });
+    } else {
+      DLComplete(validate,miner);
+    }
+  });
+}
+
+function DLComplete(i,miner) {
+  // Folderception
+  if(miner.zipdir !== undefined) {
+    fse.move(binPath+miner.folder+miner.zipdir, binPath+miner.folder, console.error);
+  }
+  bar.currentValue += i;
+  bar.animate(bar.currentValue);
+  doneMiner += 1;
+  if(doneMiner == miners.length) {
+    benchmark();
+  }
+}
+
+// Benchmark setup happens here...
 var average = arr => arr.reduce( ( p, c ) => p + c, 0 ) / arr.length;
 function isNumber(n) { return !isNaN(parseFloat(n)) && !isNaN(n - 0) }
 function benchmark() {
-  $("#action").text("Benchmarking...");
+  bar.currentValue = 0;
+  bar.animate(bar.currentValue);
+  $("#action").text("Loading pool data...");
 
   // First some checks. Pool(s) and address defined?
-  var wallet = store.get("wallet");
   if (wallet === undefined) {
     $("#error").html("Please set a wallet address to start.");
     $("#action").text("Error");
     return false;
   }
-  var spools = store.get("selectedPools");
   if (spools === undefined || spools.length == 0) {
     $("#error").html("Please select at least one pool to start.");
     $("#action").text("Error");
     return false;
   }
-  var hardware = store.get("hardware");
   if (hardware === undefined) {
     $("#error").html("Please your hardware (Nvidia or AMD) in 'Wallet & settings' first.");
     $("#action").text("Error");
     return false;
   }
 
-  // Benchmark: for all eligible miners, bench all algos on the first favorite pool
-  var miners = config.miners;
-  var cmds = [];
-  var pool = config.pools[spools[0]];
-  for(gid in selected) {
-    for(var midx in miners) {
-      var miner = miners[midx];
-      // Only eligible miners
-      if (miner.hardware != hardware) {
-        continue;
-      }
-      for(aidx in miner.algos) {
-        // TODO: fetch pool data
-        // TODO: Run miner only on algorithms each pool accepts. For now stick to zpool
-        cmds.push({
-          "name": miner.name,
-          "algo": miner.algos[aidx],
-          "port": "4533",
-          "gpu": selected[gid]
-        });
+  // Benchmark: for all eligible miners, bench all algos on the first eligible pool
+  // Instead of checking HR on 1 pool, get all selected pools' algos,
+  // all selected algos, then associate a pool for each algo
+  // Fetch pool data
+  mutils.getPoolData(true, function(algosInPools) {
+    if(Object.keys(algosInPools).length == 0) {
+      $("#error").html("Could not load any pool data. Please try again later or pick other pools.");
+      return false;
+    }
+    $("#error").html("");
+    var cmds = [];
+    var testedAlgos = []; // Store the algos we could set for test (in case some algos are only on some pools)
+    for(gid in gpus_to_use) {
+      for(var midx in miners) {
+        var miner = miners[midx];
+        // Only eligible miners
+        if (miner.hardware != hardware) {
+          continue;
+        }
+        for(aidx in miner.algos) {
+          var algo = miner.algos[aidx];
+          if(testedAlgos.indexOf(algo) == -1 && algosInPools[algo] != -1) {
+            // TODO: use a command builder with placeholders...
+            cmds.push({
+              "exe": binPath+miner.folder+miner.name,
+              "algo": algo,
+              "stratum": algosInPools[algo],
+              "gpu": gpus_to_use[gid]
+            });
+            testedAlgos.push(algo)
+          }
+        }
       }
     }
-  }
+  });
+  return false;
+  $("#action").text("Benchmarking...");
 
-  // Progress bar increments: #miners.algos * #pools
-  var benchtime = store.get("benchtime");
+  // Progress bar increments: # algos (even non unique)
   var shares = cmds.length;
   var increment = 1/shares;
   var barval = 0;
@@ -257,6 +358,13 @@ function benchmark() {
       }
     });
 
+    m.stderr.on('data', (data) => {
+      err = new TextDecoder("utf-8").decode(data);
+      if (config.debug == true) {
+        console.log(err);
+      }
+    });
+
     // When job is closed (end of this bench)
     m.on('close', (code) => {
       var avgH = average(hashes);
@@ -264,14 +372,11 @@ function benchmark() {
         console.log();
       }
       var benched = store.get("benched");
-      console.log(benched);
       if(benched[gid] === undefined) {
         benched[gid] = {};
       }
       benched[gid][algo] = avgH;
       store.set("benched", benched);
-      console.log(benched)
-
       callback();
     });
 
@@ -291,7 +396,7 @@ function benchmark() {
   });
 }
 
-// GPU list
+// Display GPU list
 function updateGPUs() {
   var gpus = store.get('gpus');
   if(gpus !== undefined && gpus.length > 0) {
@@ -307,6 +412,13 @@ function updateGPUs() {
       selected = " active";
       $("#benchmark").removeClass("disabled");
     }
-    $("#gpuList").append("<a href='#' class='list-group-item list-group-item-action "+selected+"' id='gpuid_"+id+"'>"+gpus[id]+"<span class='pull-right'><button class='stats btn btn-xs secondary "+dis+"' id='stats_"+id+"'>Stats</button></span></a>")
+    $("#gpuList").append("<a href='#' class='list-group-item list-group-item-action "+selected+"' id='gpuid_"+id+"'>"+gpus[id]+"<span class='pull-right'><button class='stats btn btn-xs secondary "+dis+"' id='stats_"+id+"'>Statistics</button></span></a>");
   }
+}
+
+// Intro section
+if(store.get("intro") == false) {
+  $("#back").hide();
+} else {
+  $("#benchinfo").show();
 }

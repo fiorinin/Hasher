@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="../node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <link href="https://fonts.googleapis.com/css?family=Raleway" rel="stylesheet">
+    <link rel="stylesheet" href="css/hasher.css">
+    <title>Hasher</title>
+  </head>
+  <body>
+
+    <div class="container-fluid">
+      <div class="row top-buffer">
+        <div class="col-xs-12 text-center">
+          <h1>You're all set!</h1>
+          <p>Thank you for giving a try to Hasher. I truly hope you'll like it! Please, feel free to report issues or ask for functionalities on <a href="https://github.com/Johy/Hasher">GitHub</a>.</p>
+          <p>Before you can use Hasher, you will need to set it up. It's easy and it only takes a couple of minutes.</p>
+          <button type="button" class="btn" id="hash">Let's go!</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer text-right">
+      <span id="version"></span>
+    </div>
+
+    <script>
+        window.jQuery = window.$ = require('jquery');
+    </script>
+    <script src="../node_modules/bootstrap/dist/js/bootstrap.js"></script>
+    <script>
+      require('./js/settings.js');
+      const {ipcRenderer} = require('electron');
+      $("#hash").click(function() {
+        ipcRenderer.send('changePage', "options");
+      })
+    </script>
+
+  </body>
+</html>
