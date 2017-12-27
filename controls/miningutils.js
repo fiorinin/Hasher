@@ -5,12 +5,7 @@ var retry = require('requestretry');
 var request = require("request");
 
 module.exports = class MiningUtils {
-  constructor() {
-    this.minerOutputs = {
-      // miner name => output type
-      "ccminer": "ccminer"
-    }
-  }
+  constructor() {}
 
   uniform(hashrate, unit) {
     var multiplier = 1
@@ -37,9 +32,8 @@ module.exports = class MiningUtils {
       return Math.round((hashrate/1000)*100)/100+"KH/s";
   }
 
-  getHashrate(miner, string) {
-    switch (this.minerOutputs[miner]) {
-      case "ccminer":
+  getHashrate(exe, string) {
+    if(exe.includes("ccminer")) {
         return this.parseCcminer(string);
     }
   }
@@ -134,7 +128,7 @@ module.exports = class MiningUtils {
               if(algosInPools[key] === undefined) {
                 algosInPools[key] = {"stratum": MiningUtils.buildStratum(pool.mine_URL, key, value.port, pid), "current_estimate": value.estimate_current, "24h_estimated": value.estimate_last24h, "24h_actual": value.actual_last24h};
               } else if(!unique) {
-                algosInPools[pid][algo] = {"stratum": MiningUtils.buildStratum(pool.mine_URL, algo, port, pid), "current_estimate": tds[6].innerHTML, "24h_estimated": tds[7].innerHTML, "24h_actual": tds[8].innerHTML};
+                algosInPools[pid][key] = {"stratum": MiningUtils.buildStratum(pool.mine_URL, key, value.port, pid), "current_estimate": value.estimate_current, "24h_estimated": value.estimate_last24h, "24h_actual": value.actual_last24h};
               }
             }
             poolsRetrieved++;
@@ -151,6 +145,13 @@ module.exports = class MiningUtils {
     // Zpool
     if(pid == 0) {
       return `stratum+tcp://${algo}.${uri}:${port}`;
+    }
+  }
+
+  static buildCommand(exe, algo, stratum, gpus) {
+    // Ccminer
+    if(exe.includes("ccminer")) {
+      return [`${exe}`, [`-a`, `${algo}`, `-i`, `21`, `-o`, `${stratum}`, `-u`, `${store.get("wallet")}`, `-p`, `Hasher,c=BTC`, `-d`, `${gpus.join(",")}`]];
     }
   }
 }

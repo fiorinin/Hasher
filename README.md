@@ -20,13 +20,13 @@ npm start
 ```
 
 ## Features
-Easy introduction and setup
-Nice interface, more user-friendly than .bat files
-Checks BTC address
-Multipool supported
-Profit calculation works even when APIs are having troubles (retry, caching, and html parsing)
-Single window with all needed information at hand
-Automatic update checks
+* Easy introduction and setup
+* Nice interface, more user-friendly than .bat files
+* Checks BTC address
+* Multipool supported
+* Profit calculation works even when APIs are having troubles (retry, caching, and html parsing)
+* Single window with all needed information at hand
+* Automatic update checks
 
 ### Notes to self
 CUDA 9 binaries require a nvidia driver 384.xx or more recent

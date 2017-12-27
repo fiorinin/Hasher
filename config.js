@@ -8,13 +8,21 @@ config.cache = {
 };
 
 // Successive calls to APIs
-config.retry_nb = 2;
+config.retry_nb = 0;
 config.retry_delay = 10000;
+
+// Benchmark speeds
+config.speed = {
+  "fast": 30000,
+  "regular": 120000,
+  "slow": 180000,
+}
 
 // Supported miners
 config.miners = [
   {
     "name": "ccminer-x64",
+    "alias": "tpruvot",
     "hardware": "nvidia",
     "URL": "https://github.com/tpruvot/ccminer/releases/download/2.2.3-tpruvot/ccminer-x64-2.2.3-cuda9.7z",
     "folder": "ccminerTPruvot/",
@@ -22,13 +30,15 @@ config.miners = [
   },
   {
     "name": "ccminer-alexis",
+    "alias": "alexis78",
     "hardware": "nvidia",
     "URL": "https://github.com/nemosminer/ccminer-hcash/releases/download/alexishsr/ccminer-hsr-alexis-x86-cuda8.7z",
     "folder": "ccminerAlexis78/",
-    "algos": ["hsr"]
+    "algos": ["hsr"] // add x17
   },
   {
     "name": "ccminer",
+    "alias": "klaust",
     "hardware": "nvidia",
     "URL": "https://github.com/KlausT/ccminer/releases/download/8.15/ccminer-815-cuda9-x64.zip",
     "folder": "ccminerKlausT/",
@@ -36,6 +46,7 @@ config.miners = [
   },
   {
     "name": "ccminer",
+    "alias": "nanashi",
     "hardware": "nvidia",
     "URL": "https://github.com/nicehash/ccminer-nanashi/releases/download/1.7.6-r6/ccminer.zip",
     "folder": "ccminerNanashi/",
@@ -43,6 +54,7 @@ config.miners = [
   },
   {
     "name": "ccminer_cuda9",
+    "alias": "mscv2015",
     "hardware": "nvidia",
     "URL": "https://github.com/djm34/ccminer-msvc2015/releases/download/v0.2.1/ccminer_cuda9.exe",
     "folder": "ccminermsvc2015/",
@@ -50,6 +62,7 @@ config.miners = [
   },
   {
     "name": "ccminer",
+    "alias": "meiyo",
     "hardware": "nvidia",
     "URL": "https://github.com/Nanashi-Meiyo-Meijin/ccminer/releases/download/v2.2-mod-r2/2.2-mod-r2-CUDA9.binary.zip",
     "folder": "ccminerNanashiMeiyo/",
@@ -58,13 +71,15 @@ config.miners = [
   },
   {
     "name": "ccminer",
+    "alias": "poly",
     "hardware": "nvidia",
     "URL": "https://github.com/punxsutawneyphil/ccminer/releases/download/polytimosv2/ccminer-polytimos_v2.zip",
-    "folder": "ccminerPunxsutawneyphilv/",
+    "folder": "ccminerPoly/",
     "algos": ["poly"]
   },
   {
     "name": "ccminer_x11gost",
+    "alias": "x11gost",
     "hardware": "nvidia",
     "URL": "https://github.com/nicehash/ccminer-x11gost/releases/download/ccminer-x11gost_windows/ccminer_x11gost.7z",
     "folder": "ccminerX11gost/",
@@ -72,6 +87,7 @@ config.miners = [
   },
   {
     "name": "ccminer",
+    "alias": "skunk",
     "hardware": "nvidia",
     "URL": "https://github.com/scaras/ccminer-2.2-mod-r1/releases/download/2.2-r1/2.2-mod-r1.zip",
     "folder": "ccminerSkunk/",
@@ -80,6 +96,7 @@ config.miners = [
   },
   {
     "name": "ccminer",
+    "alias": "sp",
     "hardware": "nvidia",
     "URL": "https://github.com/sp-hash/ccminer/releases/download/1.5.81/release81.7z",
     "folder": "ccminerSp/",
@@ -88,6 +105,7 @@ config.miners = [
   },
   {
     "name": "ccminer_x86",
+    "alias": "xevan",
     "hardware": "nvidia",
     "URL": "https://github.com/nemosminer/ccminer-xevan/releases/download/ccminer-xevan/ccminer_x86.7z",
     "folder": "ccminerXevan/",

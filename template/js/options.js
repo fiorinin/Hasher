@@ -80,15 +80,7 @@ function reloadSpeeds() {
           nbalgos += miners[midx].algos.length;
         }
       }
-      if(speed == "slow") {
-        $(this).text(" (~"+nbalgos*3+"mins)");
-      }
-      if(speed == "regular") {
-        $(this).text(" (~"+nbalgos*2+"mins)");
-      }
-      if(speed == "fast") {
-        $(this).text(" (~"+nbalgos+"mins)");
-      }
+      $(this).text(" ("+Math.round(nbalgos*(config.speed[speed]/60000))+"mins/GPU)");
     }
   })
 }
@@ -97,6 +89,7 @@ reloadSpeeds();
 // Intro section
 if(store.get("intro") == false) {
   $("#back").hide();
+  $("#advanced").hide();
 } else{
   $("#next").hide();
 }
@@ -114,6 +107,6 @@ $("#next").click(function() {
   }
   if(!err) {
     const {ipcRenderer} = require('electron');
-    ipcRenderer.send('changePage', "performance");
+    ipcRenderer.send('changePage', "pool");
   }
 });

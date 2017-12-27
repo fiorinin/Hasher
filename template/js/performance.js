@@ -95,7 +95,6 @@ $(".stats").click(function(event) {
   if ($(this).hasClass("disabled")) {
     return false;
   }
-  // TODO: manage algos before first bench
   event.stopPropagation();
   var gpuid = $(this).attr("id").replace("stats_", "");
   $("#gpuname").html("Statistics for GPU #"+gpuid);
@@ -113,7 +112,7 @@ $(".stats").click(function(event) {
       checked = "checked";
     }
     var checkbox = `<div class="pretty p-icon p-jelly">
-                      <input type="checkbox" class="ealgo enable_${stat}" ${checked}/>
+                      <input type="checkbox" class="ealgo enable_${stat}" id="gpu${gpuid}_${stat}" ${checked}/>
                         <div class="state p-primary-o">
                             <i class="icon glyphicon glyphicon-check"></i>
                             <label></label>
@@ -149,7 +148,7 @@ for (var i = 0; i < miners.length; i++) {
   var miner = miners[i];
   if(miner.hardware == hardware) {
     for(var j = 0; j < miner.algos.length; j++) {
-      var algo = miner.algos[j];
+      var algo = `${miner.alias}-${miner.algos[j]}`;
       if(listedAlgos.indexOf(algo) == -1) {
         listedAlgos.push(algo);
       }
@@ -168,7 +167,7 @@ for(var i = 0; i < listedAlgos.length; i++) {
     checked = "checked";
   }
   var checkbox = `<div class="pretty p-icon p-jelly">
-                    <input type="checkbox" class="ealgo enable_${algo}" ${checked}/>
+                    <input type="checkbox" class="ealgo enable_${algo}" id="global_${algo}" ${checked}/>
                       <div class="state p-primary-o">
                           <i class="icon glyphicon glyphicon-check"></i>
                           <label></label>
@@ -214,7 +213,6 @@ $("#benchmark").click(function() {
       if (!fs.existsSync(binPath+miner.folder)) {
         fs.mkdirSync(binPath+miner.folder);
       }
-      console.log(`I miss ${binPath+miner.folder+miner.name}.exe`)
       fetchAndUnzip(miner,increment);
     } else {
       bar.currentValue += increment;
@@ -312,87 +310,81 @@ function benchmark() {
         }
         for(aidx in miner.algos) {
           var algo = miner.algos[aidx];
-          if(testedAlgos.indexOf(algo) == -1 && algosInPools[algo] != -1) {
-            // TODO: use a command builder with placeholders...
-            cmds.push({
-              "exe": binPath+miner.folder+miner.name,
-              "algo": algo,
-              "stratum": algosInPools[algo],
-              "gpu": gpus_to_use[gid]
-            });
-            testedAlgos.push(algo)
+          if(enabled_algos[`${miner.alias}-${algo}`] && testedAlgos.indexOf(`${miner.alias}-${algo}`) == -1 && algosInPools[algo] !== undefined) {
+            cmds.push([gid, `${miner.alias}-${algo}`, MiningUtils.buildCommand(binPath+miner.folder+miner.name, algo, algosInPools[algo]["stratum"], [gpus_to_use[gid]])]);
+            testedAlgos.push(algo);
           }
         }
       }
     }
-  });
-  return false;
-  $("#action").text("Benchmarking...");
 
-  // Progress bar increments: # algos (even non unique)
-  var shares = cmds.length;
-  var increment = 1/shares;
-  var barval = 0;
-  var barRefreshFraction = 20;
+    $("#action").text("Benchmarking...");
+    // Progress bar increments: # algos (even non unique)
+    var shares = cmds.length;
+    var increment = 1/shares;
+    var barval = 0;
+    var barRefreshFraction = 20;
 
-  // async but nonparallel mining bench
-  async.each(cmds, function (cmd, callback) {
+    // async but nonparallel mining bench
+    async.eachSeries(cmds, function (cmd, callback) {
+      var gid = cmd[0];
+      var algo = cmd[1];
+      cmd = cmd[2];
 
-    // Cancel any remaining bench if user cancelled
-    if(cancelBenchmark) {
-      callback();
-    }
-
-    // Spawn a job for x minutes, the longer the more accurate
-    var hashes = [];
-    var algo = cmd.algo;
-    var gid = cmd.gpu;
-    var m = spawn(binPath+miner.folder+cmd.name+".exe",["-a", algo,"-o","stratum+tcp://"+algo+"."+pool.mine_URL+":"+cmd.port, "-u", wallet, "-p", "Hasher", "-d", gid]);
-    m.stdout.on('data', (data) => {
-      hash = mutils.getHashrate(miner.name, new TextDecoder("utf-8").decode(data));
-      if (config.debug == true) {
-        console.log(hash);
+      // Cancel any remaining bench if user cancelled
+      if(cancelBenchmark) {
+        callback();
       }
-      if(isNumber(hash)) {
-        hashes.push(hash);
-      }
+
+      // Spawn a job for x minutes, the longer the more accurate
+      var hashes = [];
+      var m = spawn(...cmd);
+      m.stdout.on('data', (data) => {
+        hash = mutils.getHashrate(cmd[0], new TextDecoder("utf-8").decode(data));
+        if (config.debug == true) {
+          console.log(hash);
+        }
+        if(isNumber(hash)) {
+          hashes.push(hash);
+        }
+      });
+
+      m.stderr.on('data', (data) => {
+        err = new TextDecoder("utf-8").decode(data);
+        if (config.debug == true) {
+          console.log(err);
+        }
+      });
+
+      // When job is closed (end of this bench)
+      m.on('close', (code) => {
+        var avgH = average(hashes);
+        if(config.debug) {
+          console.log(`logged: ${avgH}`);
+        }
+        var benched = store.get("benched");
+        if(benched[gid] === undefined) {
+          benched[gid] = {};
+        }
+        benched[gid][algo] = avgH;
+        store.set("benched", benched);
+        callback();
+      });
+
+      // Update progress frequently, then close job
+      var x = 0;
+      var intervalID = setInterval(function () {
+        barval += increment/barRefreshFraction;
+        bar.animate(barval);
+         if (++x === barRefreshFraction) {
+             window.clearInterval(intervalID);
+             m.kill();
+         }
+      }, benchtime/barRefreshFraction);
+    }, function () {
+      // Close popup
+      setTimeout(function(){$(".loadpopup").addClass("hidden");}, 1000);
     });
-
-    m.stderr.on('data', (data) => {
-      err = new TextDecoder("utf-8").decode(data);
-      if (config.debug == true) {
-        console.log(err);
-      }
-    });
-
-    // When job is closed (end of this bench)
-    m.on('close', (code) => {
-      var avgH = average(hashes);
-      if(config.debug) {
-        console.log();
-      }
-      var benched = store.get("benched");
-      if(benched[gid] === undefined) {
-        benched[gid] = {};
-      }
-      benched[gid][algo] = avgH;
-      store.set("benched", benched);
-      callback();
-    });
-
-    // Update progress frequently, then close job
-    var x = 0;
-    var intervalID = setInterval(function () {
-      barval += increment/barRefreshFraction;
-      bar.animate(barval);
-       if (++x === barRefreshFraction) {
-           window.clearInterval(intervalID);
-           m.kill();
-       }
-    }, benchtime/barRefreshFraction);
-  }, function () {
-    // Reload page
-    setTimeout(function(){location.reload(); }, 10000);
   });
 }
 

@@ -38,6 +38,7 @@ $(".pool").change(function() {
   store.set("selectedPools", selectedPools);
 })
 
+// TODO: double check that bit...
 $(".region").change(function() {
   var langPools = store.get("langPools");
   var sp = $(this).attr('id').split("_");
@@ -52,3 +53,23 @@ $(".region").change(function() {
   }
   store.set("langPools", langPools);
 })
+
+// Intro section
+if(store.get("intro") == false) {
+  $("#back").hide();
+} else{
+  $("#next").hide();
+}
+
+$("#next").click(function() {
+  $("#intro_errors").html("");
+  var err = false;
+  if(selectedPools === undefined) {
+    $("#intro_errors").append("You need to select at least one pool.");
+    err = true;
+  }
+  if(!err) {
+    const {ipcRenderer} = require('electron');
+    ipcRenderer.send('changePage', "performance");
+  }
+});
