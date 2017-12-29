@@ -3,6 +3,7 @@ const store = new Store();
 const ipcRenderer = require('electron').ipcRenderer;
 const remote = require('electron').remote;
 const app = remote.app;
+const binPath = app.getPath('userData') +"/bin/";
 var AdmZip = require('adm-zip');
 var _7z = require('7zip')['7z']
 var request = require('request');
@@ -12,7 +13,6 @@ const async = require('async');
 const MiningUtils = require("../../controls/miningutils.js");
 const mutils = new MiningUtils();
 var cancelBenchmark = false;
-const binPath = app.getPath('userData') +"/bin/";
 var fse = require('fs-extra');
 
 // Some global settings
@@ -24,6 +24,9 @@ var enabled_algos = store.get("enabled_algos");
 var wallet = store.get("wallet");
 var spools = store.get("selectedPools");
 var benchtime = store.get("benchtime");
+var benched = store.get("benched");
+var estimate = store.get("estimate");
+var intensities = store.get("intensities");
 
 // Detect GPUs can take a while and is handled backend
 ipcRenderer.on("gpus", function(e,d) {
@@ -90,65 +93,13 @@ $("#cancel_bench").click(function() {
   //bar.animate(0, function() {}); // cool but for later
 })
 
-// Stats popup
-$(".stats").click(function(event) {
-  if ($(this).hasClass("disabled")) {
-    return false;
-  }
-  event.stopPropagation();
-  var gpuid = $(this).attr("id").replace("stats_", "");
-  $("#gpuname").html("Statistics for GPU #"+gpuid);
-  var stats = store.get("benched")[gpuid];
-  $("#gpustats>tbody").html("");
-  // Todo: wrong, for all algos available for this hardware...
-  for (stat in stats) {
-    var hr = mutils.pprint(stats[stat]);
-    var checked = "";
-    if(enabled_algos[stat] === undefined){
-      enabled_algos[stat] = true;
-      store.set("enabled_algos", enabled_algos);
-    }
-    if(enabled_algos[stat] == true) {
-      checked = "checked";
-    }
-    var checkbox = `<div class="pretty p-icon p-jelly">
-                      <input type="checkbox" class="ealgo enable_${stat}" id="gpu${gpuid}_${stat}" ${checked}/>
-                        <div class="state p-primary-o">
-                            <i class="icon glyphicon glyphicon-check"></i>
-                            <label></label>
-                        </div>
-                    </div>`
-    $("#gpustats>tbody").append("<tr><td>"+stat+"</td><td>"+hr+"</td><td>"+checkbox+"<td></tr>");
-  }
-  $(".statspopup").removeClass("hidden");
-});
-
-// Enable/disable algos
-$(document.body).on('change', '.ealgo' ,function(){
-  var algo = $(this).attr("id").split("_")[1];
-  enabled_algos[algo] = $(this).is(":checked");
-  // Update all similar checkboxes
-  $(`.enable_${algo}`).prop('checked', $(this).is(":checked"));
-  store.set("enabled_algos", enabled_algos);
-})
-
-// Close stats popup
-$("#closeStats").click(function() {
-  $(".statspopup").addClass("hidden");
-})
-
-// Algorithm popup
-$("#pick_algos").click(function(event) {
-  $(".algopopup").removeClass("hidden");
-});
-
-// Fill it with relevant algos
+// Eligible algos
 listedAlgos = [];
 for (var i = 0; i < miners.length; i++) {
   var miner = miners[i];
   if(miner.hardware == hardware) {
     for(var j = 0; j < miner.algos.length; j++) {
-      var algo = `${miner.alias}-${miner.algos[j]}`;
+      var algo = `${miner.algos[j]}-${miner.alias}`;
       if(listedAlgos.indexOf(algo) == -1) {
         listedAlgos.push(algo);
       }
@@ -156,34 +107,142 @@ for (var i = 0; i < miners.length; i++) {
   }
 }
 listedAlgos.sort();
-for(var i = 0; i < listedAlgos.length; i++) {
-  var algo = listedAlgos[i];
-  var checked = "";
-  if(enabled_algos[algo] === undefined){
-    enabled_algos[algo] = true;
-    store.set("enabled_algos", enabled_algos);
+
+// Enable/disable algos
+$(document.body).on('change', '.ealgo' ,function(){
+  var algo = $(this).attr("id").split("_")[1];
+  enabled_algos[algo] = $(this).is(":checked");
+  store.set("enabled_algos", enabled_algos);
+})
+
+// Algorithm popup
+$("#pick_algos").click(function(event) {
+  $(".algopopup").removeClass("hidden");
+});
+
+var pref_cur = store.get("pref_cur");
+var currency_value = store.get(`btc${pref_cur}`);
+$("#pref_cur").text(`Estimated ${pref_cur.toUpperCase()}/day`);
+mutils.getMaxProfit(function(max_profit) {
+  // Fill it with relevant algos
+  for(var i = 0; i < listedAlgos.length; i++) {
+    var algo = listedAlgos[i];
+    var checked = "";
+    if(enabled_algos[algo] === undefined){
+      enabled_algos[algo] = true;
+      store.set("enabled_algos", enabled_algos);
+    }
+    if(enabled_algos[algo] == true) {
+      checked = "checked";
+    }
+    var checkbox = `<div class="pretty p-icon p-jelly checkboxSort">
+                      <input type="checkbox" class="ealgo enable_${algo}" id="global_${algo}" ${checked}/>
+                        <div class="state p-primary-o">
+                            <i class="icon glyphicon glyphicon-check"></i>
+                            <label></label>
+                        </div>
+                    </div>`
+    var alsplit = algo.split("-");
+    var algodisplay = `<b>${alsplit[0]}</b>-${alsplit[1]}`;
+    var hr = mutils.pprint(benched[algo]);
+
+    // Calculate profits
+    var btcprofit = curprofit = "Unknown";
+    if (hr != "Unknown") {
+      var best_for_algo = max_profit[alsplit[0]];
+      if(best_for_algo !== undefined) {
+        var estimated_val = max_profit[estimate]
+        var pid = best_for_algo["pid"];
+        var pool = config.pools[pid];
+        var coin_unit = pool.coin_unit.default;
+        if (pool.coin_unit[alsplit[0]] !== undefined) {
+          coin_unit = pool.coin_unit[alsplit[0]];
+        }
+        btcprofit = Math.round(benched[algo] / coin_unit * best_for_algo[estimate] * pool.profit_multiplier * config.decimals.btc) / config.decimals.btc; // Last bit means 8 decimals
+        curprofit = Math.round(btcprofit * currency_value * config.decimals.cur) / config.decimals.cur;
+      } else {
+        btcprofit = "Unsupported"
+        curprofit = "Unsupported"
+      }
+    }
+
+    // Display
+    var el = $(`<tr><td class="col-xs-3">${algodisplay}</td><td class="col-xs-2">${hr}</td><td class="col-xs-2">${btcprofit}</td><td class="col-xs-2">${curprofit}</td><td class="col-xs-2 text-center">${checkbox}</td></tr>`)
+    table.row.add(el).draw();
+    // Previous options were for a 4 column display but then filtering the table is a pain... So forget it for now, we'll scroll.
   }
-  if(enabled_algos[algo] == true) {
-    checked = "checked";
-  }
-  var checkbox = `<div class="pretty p-icon p-jelly">
-                    <input type="checkbox" class="ealgo enable_${algo}" id="global_${algo}" ${checked}/>
-                      <div class="state p-primary-o">
-                          <i class="icon glyphicon glyphicon-check"></i>
-                          <label></label>
-                      </div>
-                  </div>`
-  if(i % 2 == 0) {
-    $("#algos>tbody").append(`<tr><td>${algo}</td><td>${checkbox}</td></tr>`);
-  } else {
-    $("#algos>tbody>tr:last").append(`<td>${algo}</td><td>${checkbox}</td>`);
-  }
-}
+});
 
 // Close algos popup
-$("#closeAlgos").click(function() {
+$(".closeAlgos").click(function() {
   $(".algopopup").addClass("hidden");
+});
+
+// Select/unselect all
+$(".selectAll").click(function() {
+  var filter = $(this).parent().next().find("button").text();
+  $(".ealgo").each(function() {
+    var miner = $(this).closest("tr").find(">:first").text().split("-")[1];
+    if(filter.includes("All") || filter.includes(miner)) {
+      $(this).prop("checked", true).change();
+    }
+  })
 })
+$(".deselectAll").click(function() {
+  var filter = $(this).parent().next().find("button").text();
+  $(".ealgo").each(function() {
+    var miner = $(this).closest("tr").find(">:first").text().split("-")[1];
+    if(filter.includes("All") || filter.includes(miner)) {
+      $(this).prop("checked", false).change();
+    }
+  })
+})
+
+// Sort data
+var table = $("#algos").DataTable({
+    "searching":   false,
+    "paging":   false,
+    "info":     false,
+    "aoColumns":[
+      {"sType":"string"},
+      {"orderable": false},
+      {"sType":"numbercase"},
+      {"sType":"numbercase"},
+      {"sSortDataType": "dom-checkbox", "orderSequence": [ "desc", "asc" ], "targets": [ 4 ]}
+    ],
+
+});
+var fuzzyNum =function(x){
+ return+x.replace(/[^\d\.\-]/g,"");
+};
+jQuery.fn.dataTableExt.oSort['numbercase-asc']=function(x, y){
+  return fuzzyNum(x)- fuzzyNum(y);
+};
+jQuery.fn.dataTableExt.oSort['numbercase-desc']=function(x, y){
+  return fuzzyNum(y)- fuzzyNum(x);
+};
+$.fn.dataTable.ext.order['dom-checkbox'] = function (settings, col) {
+  return this.api().column(col, { order: 'index' }).nodes().map(function (td, i) {
+      return $('input', td).is(":checked") ? '1' : '0';
+  });
+}
+
+
+miners.forEach(function(miner) {
+  $(".dropdown-menu-right").append(`<li><a href="#">${miner.alias}</a></li>`);
+})
+
+$(document.body).on('click', '.dropdown-menu li a', function(){
+  var miner = $(this).text();
+  $('.minerfilter').html(`${miner} <span class="caret"></span>`);
+  $(this).closest(".col-xs-6").next().find(`tbody tr`).each(function() {
+    if(!$(this).find(">:first").text().includes(miner) && !miner.includes("All")) {
+      $(this).hide();
+    } else {
+      $(this).show();
+    }
+  });
+});
 
 // Click on benchmark: DL miners first and verify requirements
 var doneMiner;
@@ -293,27 +352,24 @@ function benchmark() {
   // Instead of checking HR on 1 pool, get all selected pools' algos,
   // all selected algos, then associate a pool for each algo
   // Fetch pool data
-  mutils.getPoolData(true, function(algosInPools) {
+  mutils.getStratums(true, function(algosInPools) {
     if(Object.keys(algosInPools).length == 0) {
       $("#error").html("Could not load any pool data. Please try again later or pick other pools.");
       return false;
     }
     $("#error").html("");
     var cmds = [];
-    var testedAlgos = []; // Store the algos we could set for test (in case some algos are only on some pools)
-    for(gid in gpus_to_use) {
-      for(var midx in miners) {
-        var miner = miners[midx];
-        // Only eligible miners
-        if (miner.hardware != hardware) {
-          continue;
-        }
-        for(aidx in miner.algos) {
-          var algo = miner.algos[aidx];
-          if(enabled_algos[`${miner.alias}-${algo}`] && testedAlgos.indexOf(`${miner.alias}-${algo}`) == -1 && algosInPools[algo] !== undefined) {
-            cmds.push([gid, `${miner.alias}-${algo}`, MiningUtils.buildCommand(binPath+miner.folder+miner.name, algo, algosInPools[algo]["stratum"], [gpus_to_use[gid]])]);
-            testedAlgos.push(algo);
-          }
+    for(var midx in miners) {
+      var miner = miners[midx];
+      // Only eligible miners
+      if (miner.hardware != hardware) {
+        continue;
+      }
+      for(aidx in miner.algos) {
+        var algo = miner.algos[aidx];
+        var alias = `${algo}-${miner.alias}`
+        if(enabled_algos[alias] && algosInPools[algo] !== undefined) {
+          cmds.push([alias, MiningUtils.buildCommand(binPath+miner.folder+miner.name, algo, intensities[alias], algosInPools[algo]["stratum"], gpus_to_use)]);
         }
       }
     }
@@ -324,12 +380,12 @@ function benchmark() {
     var increment = 1/shares;
     var barval = 0;
     var barRefreshFraction = 20;
+    var gid = gpus_to_use.join(",");
 
     // async but nonparallel mining bench
     async.eachSeries(cmds, function (cmd, callback) {
-      var gid = cmd[0];
-      var algo = cmd[1];
-      cmd = cmd[2];
+      var algo = cmd[0];
+      cmd = cmd[1];
 
       // Cancel any remaining bench if user cancelled
       if(cancelBenchmark) {
@@ -362,11 +418,12 @@ function benchmark() {
         if(config.debug) {
           console.log(`logged: ${avgH}`);
         }
-        var benched = store.get("benched");
-        if(benched[gid] === undefined) {
-          benched[gid] = {};
+        // If new bench or bench was with other GPU set, reset
+        if(benched.gpus === undefined || benched.gpus != gid) {
+          benched = {};
+          benched.gpus = gid;
         }
-        benched[gid][algo] = avgH;
+        benched[algo] = avgH;
         store.set("benched", benched);
         callback();
       });
@@ -382,8 +439,8 @@ function benchmark() {
          }
       }, benchtime/barRefreshFraction);
     }, function () {
-      // Close popup
-      setTimeout(function(){$(".loadpopup").addClass("hidden");}, 1000);
+      // Close popup by reloading
+      location.reload();
     });
   });
 }
@@ -395,22 +452,47 @@ function updateGPUs() {
     $("#gpuList").html("");
   }
   for (var id in gpus) {
-    var dis = 'disabled';
-    if (typeof store.get('benched') !== 'undefined' && typeof store.get('benched')[id] !== 'undefined') {
-      dis = "";
-    }
     var selected = '';
-    if (typeof store.get('gpus_to_use') !== 'undefined' && typeof store.get('gpus_to_use')[id] !== 'undefined') {
+    if (gpus_to_use !== undefined && gpus_to_use.indexOf(+id) !== -1) {
       selected = " active";
       $("#benchmark").removeClass("disabled");
     }
-    $("#gpuList").append("<a href='#' class='list-group-item list-group-item-action "+selected+"' id='gpuid_"+id+"'>"+gpus[id]+"<span class='pull-right'><button class='stats btn btn-xs secondary "+dis+"' id='stats_"+id+"'>Statistics</button></span></a>");
+    $("#gpuList").append("<a href='#' class='list-group-item list-group-item-action "+selected+"' id='gpuid_"+id+"'>"+gpus[id]+"</a>");
   }
 }
 
+// TODO: This is a duplicate from index, I should make it cleaner instead of repeating code
+// Fetch BTC value
+var https = require('https');
+function updateCurrency() {
+  var url = 'https://api.coindesk.com/v1/bpi/currentprice.json';
+  https.get(url, function(res) {
+      var body = '';
+      res.on('data', function(chunk){
+          body += chunk;
+      });
+      res.on('end', function(){
+          var response= JSON.parse(body);
+          store.set("btcusd", Math.round(response.bpi.USD.rate_float));
+          store.set("btceur", Math.round(response.bpi.EUR.rate_float));
+      });
+  })
+}
+updateCurrency();
+
 // Intro section
 if(store.get("intro") == false) {
+  if(Object.keys(benched).length == 0) {
+    $("#next").hide();
+  }
   $("#back").hide();
 } else {
   $("#benchinfo").show();
+  $("#next").hide();
 }
+
+$("#next").click(function() {
+  store.set("intro", true);
+  const {ipcRenderer} = require('electron');
+  ipcRenderer.send('changePage', "end");
+});

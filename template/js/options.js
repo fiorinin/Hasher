@@ -3,6 +3,8 @@ const store = new Store();
 var WAValidator = require('wallet-address-validator');
 var config = store.get("config");
 
+var miners = config.miners;
+
 wal = store.get("wallet");
 if (wal !== undefined) {
   $("#wallet_address").val(wal);
@@ -55,24 +57,23 @@ if(benchtime < 120000) {
 
 $("#fast").change(function() {
   if($(this).is(":checked"))
-    store.set("benchtime", 60000)
+    store.set("benchtime", config.speed["fast"])
 })
 
 $("#regular").change(function() {
   if($(this).is(":checked"))
-    store.set("benchtime", 120000)
+    store.set("benchtime", config.speed["regular"])
 })
 
 $("#slow").change(function() {
   if($(this).is(":checked"))
-    store.set("benchtime", 180000)
+    store.set("benchtime", config.speed["slow"])
 })
 
 function reloadSpeeds() {
   $(".speed").each(function() {
     var speed = $(this).parent().parent().prev().attr("id");
     var nbalgos = 0;
-    var miners = config.miners;
     if(hardware !== undefined) {
       for(var midx in miners) {
         var miner = miners[midx];
@@ -80,11 +81,58 @@ function reloadSpeeds() {
           nbalgos += miners[midx].algos.length;
         }
       }
-      $(this).text(" ("+Math.round(nbalgos*(config.speed[speed]/60000))+"mins/GPU)");
+      $(this).text(" ("+Math.round(nbalgos*(config.speed[speed]/60000))+"mins)");
     }
   })
 }
 reloadSpeeds();
+
+// Advanced options
+var intensities = store.get("intensities");
+if (intensities === undefined) {
+  intensities = {};
+}
+$("#advanced").click(function() {
+  $(".advanced").removeClass("hidden");
+})
+$(".closeAdvanced").click(function() {
+  $(".intensity_val").each(function() {
+    var algo = $(this).attr("id");
+    intensities[algo] = $(this).val();
+  });
+  store.set("intensities", intensities);
+  $(".advanced").addClass("hidden");
+})
+
+// Duplicate from performance, should be optimized
+listedAlgos = [];
+for (var i = 0; i < miners.length; i++) {
+  var miner = miners[i];
+  if(miner.hardware == hardware) {
+    for(var j = 0; j < miner.algos.length; j++) {
+      var algo = `${miner.algos[j]}-${miner.alias}`;
+      if(listedAlgos.indexOf(algo) == -1) {
+        listedAlgos.push(algo);
+      }
+    }
+  }
+}
+listedAlgos.sort();
+for(var i = 0; i < listedAlgos.length; i++) {
+  var algo = listedAlgos[i];
+  var row = $(`<div class="row">`);
+  var val = intensities[algo] === undefined ? "" : intensities[algo];
+  var input = `<div class="col-xs-6"><div class="input-group input-group-xs">
+                <span class="input-group-addon" id="basic-addon1">${algo}</span>
+                <input type="text" id="${algo}" class="intensity_val form-control" aria-describedby="basic-addon1" value="${val}">
+              </div></div>`;
+  if(i % 2 == 0) {
+    row.append(input);
+    $(".intensity").append(row);
+  } else {
+    $(".intensity .row:last-child").append(input);
+  }
+}
 
 // Intro section
 if(store.get("intro") == false) {

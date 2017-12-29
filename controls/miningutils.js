@@ -22,6 +22,8 @@ module.exports = class MiningUtils {
   }
 
   pprint(hashrate) {
+    if(hashrate === undefined)
+      return "Unknown";
     if(hashrate > 1000000000000)
       return Math.round((hashrate/1000000000000)*100)/100+"TH/s";
     if(hashrate > 1000000000)
@@ -30,6 +32,7 @@ module.exports = class MiningUtils {
       return Math.round((hashrate/1000000)*100)/100+"MH/s";
     if(hashrate > 1000)
       return Math.round((hashrate/1000)*100)/100+"KH/s";
+    return Math.round((hashrate)*100)/100+"H/s";
   }
 
   getHashrate(exe, string) {
@@ -57,12 +60,12 @@ module.exports = class MiningUtils {
   }
 
   /* What a mess... Anyway:
-   * This returns something like { poolid: { algo: {stratum: text, ...}, ...}, ...}
-   * iff unique is false (i.e. we want stratums for all algos for all pools, good when calculating profit)
-   * If unique, returns something with this shape: { algo: {stratum: text, ...}, ...}, ...}
-   * That is, a single stratum URI for each algo, good for benchmarking only.
-   */
-  getPoolData(unique, callback) {
+  * This returns (callback) something like { poolid: { algo: {stratum: text, ...}, ...}, ...}
+  * iff unique is false (i.e. we want stratums for all algos for all pools, good when calculating profit)
+  * If unique, returns something with this shape: { algo: {stratum: text, ...}, ...}, ...}
+  * That is, a single stratum URI for each algo, good for benchmarking only.
+  */
+  getStratums(unique, callback) {
     var spools = store.get("selectedPools");
     var poolsRetrieved = 0;
     var algosInPools = {};
@@ -72,73 +75,102 @@ module.exports = class MiningUtils {
       var url = `${pool.API_URL}${pool.API_status}`;
 
       // Return data for all pools or just the first matching one
-      if(!unique) { algosInPools[pid] = {}};
+      if(!unique) { algosInPools[pid] = {}; };
 
-      // Try API x times spaced by y sec
-      retry({
-        url: url,
-        json: true,
-        maxAttempts: config.retry_nb,
-        retryDelay: config.retry_delay,
-        retryStrategy: this.__retryStrategy
-      }, function(err, response, body){
-        // Zpool
-        if(pid == 0) {
-          // Shiiieeeeet
-          if ((err || body.length == 2) && config.cache["pools"][pid] === undefined)  {
-            // Then let's go parse the actual homepage...
-            request(pool.failover_URL, function (error, response, body) {
-              if(error != null) {
-                // If impossible either, well, too bad!
-                $("#error").text("Could not contact pool. Moving to next preferred pool...");
-              } else {
-                const jsdom = require("jsdom");
-                const { JSDOM } = jsdom;
-                const dom = new JSDOM(body);
-                var els = dom.window.document.querySelectorAll("#maintable1 tbody:first-of-type tr");
-                // For each line, get all td's
-                for(var j=0; j < els.length; j++) {
-                  var tds = els[j].querySelectorAll("td");
-                  var algo = tds[0].querySelector("b").innerHTML;
-                  var port = tds[1].innerHTML;
-                  if(algosInPools[algo] === undefined && unique) {
-                    algosInPools[algo] = {"stratum": MiningUtils.buildStratum(pool.mine_URL, algo, port, pid), "current_estimate": tds[6].innerHTML, "24h_estimated": tds[7].innerHTML, "24h_actual": tds[8].innerHTML};
-                  } else if(!unique) {
-                    algosInPools[pid][algo] = {"stratum": MiningUtils.buildStratum(pool.mine_URL, algo, port, pid), "current_estimate": tds[6].innerHTML, "24h_estimated": tds[7].innerHTML, "24h_actual": tds[8].innerHTML};
-                  }
-                }
-                // Done
-                poolsRetrieved++;
-                if(poolsRetrieved == spools.length) {
-                  callback(algosInPools);
-                }
-              }
-            });
-          } else {
-            // We can't reach it but we have cache (!!!)
-            if(config.cache["pools"][pid] !== undefined) {
-              body = config.cache["pools"][pid];
-            } else { // We actually reached it without cache, EZPZ (but store it nonetheless)
-              config.cache["pools"][pid] = body;
-              store.set("config", config);
-            }
-            // Let's parse that
-            for (const [key, value] of Object.entries(body)) {
+      this.getPoolData(pid, function(err,algos) {
+        if(err != null) {
+          $("#error").text("Could not contact pool. Moving to next preferred pool...");
+        } else {
+          algos.forEach( function(obj) {
+            var algo = obj["algo"];
+            var port = obj["port"];
+            if(algosInPools[algo] === undefined && unique) {
               // Add this item to the list to benchmark potentially
-              if(algosInPools[key] === undefined) {
-                algosInPools[key] = {"stratum": MiningUtils.buildStratum(pool.mine_URL, key, value.port, pid), "current_estimate": value.estimate_current, "24h_estimated": value.estimate_last24h, "24h_actual": value.actual_last24h};
-              } else if(!unique) {
-                algosInPools[pid][key] = {"stratum": MiningUtils.buildStratum(pool.mine_URL, key, value.port, pid), "current_estimate": value.estimate_current, "24h_estimated": value.estimate_last24h, "24h_actual": value.actual_last24h};
-              }
+              algosInPools[algo] = {"stratum": MiningUtils.buildStratum(pool.mine_URL, algo, port, pid), "current_estimate": obj["current_estimate"], "24h_estimated": obj["24h_estimated"], "24h_actual": obj["24h_actual"]};
+            } else if(!unique) {
+              // Add this item to the full list of algos per pool
+              algosInPools[pid][algo] = {"stratum": MiningUtils.buildStratum(pool.mine_URL, algo, port, pid), "current_estimate": obj["current_estimate"], "24h_estimated": obj["24h_estimated"], "24h_actual": obj["24h_actual"]};
             }
-            poolsRetrieved++;
-            if(poolsRetrieved == spools.length) {
-              callback(algosInPools);
-            }
-          }
+          });
+        }
+        // Done
+        poolsRetrieved++;
+        if(poolsRetrieved == spools.length) {
+          callback(algosInPools);
         }
       });
     }
+  }
+
+  getMaxProfit(callback) {
+    this.getStratums(false, function(algosInPools) {
+      var estimate = store.get("estimate");
+      var max_profit = {};
+      for(var pool in algosInPools) {
+        for(var algo in algosInPools[pool]) {
+          if(max_profit[algo] === undefined || algosInPools[pool][algo][estimate] > max_profit[algo][estimate]) {
+            max_profit[algo] = algosInPools[pool][algo];
+            max_profit[algo]["pid"] = pool;
+          }
+        }
+      }
+      callback(max_profit);
+    })
+  }
+
+  getPoolData(pid, callback) {
+    var pool = config.pools[pid]
+    var url = `${pool.API_URL}${pool.API_status}`;
+    var algosInPool = [];
+
+    // Try API x times spaced by y sec
+    retry({
+      url: url,
+      json: true,
+      maxAttempts: config.retry_nb,
+      retryDelay: config.retry_delay,
+      retryStrategy: this.__retryStrategy
+    }, function(err, response, body){
+      // Zpool
+      if(pid == 0) {
+        // Shiiieeeeet
+        if ((err || body.length == 2) && config.cache["pools"][pid] === undefined)  {
+          // Then let's go parse the actual homepage...
+          request(pool.failover_URL, function (error, response, body) {
+            if(error != null) {
+              // If impossible either, well, too bad!
+              callback("error");
+            } else {
+              const jsdom = require("jsdom");
+              const { JSDOM } = jsdom;
+              const dom = new JSDOM(body);
+              var els = dom.window.document.querySelectorAll("#maintable1 tbody:first-of-type tr");
+              // For each line, get all td's
+              for(var j=0; j < els.length; j++) {
+                var tds = els[j].querySelectorAll("td");
+                var algo = tds[0].querySelector("b").innerHTML;
+                var port = tds[1].innerHTML;
+                algosInPool.push({"algo": algo, "port": port, "current_estimate": tds[6].innerHTML, "24h_estimated": tds[7].innerHTML, "24h_actual": tds[8].innerHTML});
+              }
+              callback(null, algosInPool);
+            }
+          });
+        } else {
+          // We can't reach it but we have cache (!!!)
+          if((err || body.length == 2) && config.cache["pools"][pid] !== undefined) {
+            body = config.cache["pools"][pid];
+          } else { // We actually reached it without cache, EZPZ (but store it nonetheless)
+            config.cache["pools"][pid] = body;
+            store.set("config", config);
+          }
+          // Let's parse that
+          for (const [key, value] of Object.entries(body)) {
+            algosInPool.push({"algo": key, "port": value.port, "current_estimate": value.estimate_current, "24h_estimated": value.estimate_last24h, "24h_actual": value.actual_last24h});
+          }
+          callback(null, algosInPool);
+        }
+      }
+    });
   }
 
   static buildStratum(uri, algo, port, pid, region) {
@@ -148,10 +180,12 @@ module.exports = class MiningUtils {
     }
   }
 
-  static buildCommand(exe, algo, stratum, gpus) {
+  static buildCommand(exe, algo, intensity, stratum, gpus) {
     // Ccminer
     if(exe.includes("ccminer")) {
-      return [`${exe}`, [`-a`, `${algo}`, `-i`, `21`, `-o`, `${stratum}`, `-u`, `${store.get("wallet")}`, `-p`, `Hasher,c=BTC`, `-d`, `${gpus.join(",")}`]];
+      if (intensity != "")
+        return [`${exe}`, [`-a`, `${algo}`, `-i`, `${intensity}`, `-o`, `${stratum}`, `-u`, `${store.get("wallet")}`, `-p`, `Hasher,c=BTC`, `-d`, `${gpus.join(",")}`]];
+      return [`${exe}`, [`-a`, `${algo}`, `-o`, `${stratum}`, `-u`, `${store.get("wallet")}`, `-p`, `Hasher,c=BTC`, `-d`, `${gpus.join(",")}`]];
     }
   }
 }

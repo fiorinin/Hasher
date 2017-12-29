@@ -115,7 +115,7 @@ a.list-group-item.active, a.list-group-item.active:hover, a.list-group-item.acti
   border-color: #4abdac;
 }
 
-.loadpopup, .statspopup, .algopopup {
+.loadpopup, .statspopup, .algopopup, .advanced {
   top:0;
   left:0;
   position: fixed;
@@ -126,7 +126,7 @@ a.list-group-item.active, a.list-group-item.active:hover, a.list-group-item.acti
   overflow: auto;
 }
 
-.algopopup {
+.algopopup, .statspopup, .advanced {
   padding-bottom: 20px;
 }
 
@@ -145,10 +145,14 @@ a.list-group-item.active, a.list-group-item.active:hover, a.list-group-item.acti
   margin-top:20px;
 }
 
+.btn-sm {
+  border-radius: .25rem;
+}
+
 .input-group-btn > .btn-primary {
-      border-radius: .25rem;
-      background-color: #4abdac;
-      border-color: #4abdac;
+  border-radius: .25rem;
+  background-color: #4abdac;
+  border-color: #4abdac;
 }
 
 .text-primary {
@@ -201,9 +205,10 @@ a.list-group-item.active, a.list-group-item.active:hover, a.list-group-item.acti
   margin-left:50px;
 }
 
-#gpustats {
+#algos {
   font-family: "rawline", sans-serif;
   font-weight: 300;
+  font-size: 12px;
 }
 
 .nvidia.pretty input:checked~.state.p-success label {
@@ -212,4 +217,18 @@ a.list-group-item.active, a.list-group-item.active:hover, a.list-group-item.acti
 
 .amd.pretty input:checked~.state.p-danger label {
     color: #d9534f;
+}
+
+.btn.white {
+  background-color: #ffffff;
+  color: #f7b733;
+  box-shadow: none;
+}
+
+.intensity .input-group-addon {
+    min-width: 155px;
+}
+
+.intensity {
+  margin-bottom: 20px;
 }

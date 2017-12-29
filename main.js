@@ -83,6 +83,9 @@ if (typeof store.get('benched') === 'undefined') {
 if (typeof store.get('enabled_algos') === 'undefined') {
   store.set("enabled_algos", {});
 }
+if (typeof store.get('estimate') === 'undefined') {
+  store.set("estimate", "24h_actual");
+}
 if (typeof store.get('langPools') === 'undefined') {
   var langPools = [];
   for(var idx in config.pools) {

@@ -13,9 +13,8 @@
       <div class="row top-buffer">
         <div class="col-xs-12 text-center">
           <h1>You're all set!</h1>
-          <p>Thank you for giving a try to Hasher. I truly hope you'll like it! Please, feel free to report issues or ask for functionalities on <a href="https://github.com/Johy/Hasher">GitHub</a>.</p>
-          <p>Before you can use Hasher, you will need to set it up. It's easy and it only takes a couple of minutes.</p>
-          <button type="button" class="btn" id="hash">Let's go!</button>
+          <p>You are now ready to use Hasher and start mining with optimized profit. Or you can also fine tune Hasher by (de)selecting algorithms or by checking out the advanced section in the settings to take full advantage of your hardware.</p>
+          <button type="button" class="btn" id="hash">Got it!</button>
         </div>
       </div>
     </div>
@@ -32,7 +31,7 @@
       require('./js/settings.js');
       const {ipcRenderer} = require('electron');
       $("#hash").click(function() {
-        ipcRenderer.send('changePage', "options");
+        ipcRenderer.send('changePage', "");
       })
     </script>
 

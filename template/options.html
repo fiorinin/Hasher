@@ -16,7 +16,7 @@
           <button type="button" class="btn" id="back">Back</button>
         </div>
         <div class="col-xs-offset-4 col-xs-4 text-right">
-          <button type="button" class="btn" id="next">Next</button>
+          <button type="button" class="btn tertiary" id="next">Next</button>
         </div>
       </div>
 
@@ -57,7 +57,7 @@
       <div class="row top-buffer">
         <div class="col-xs-12">
           <h4>Benchmark speed </h4>
-          <small>The slower the more accurate the profit estimates will be. The time estimates below correspond the maximum time per GPU (i.e. assuming you benchmark on all eligible algorithms).</small>
+          <small>The slower the more accurate the profit estimates will be. The time estimates below correspond the maximum time (i.e. assuming you benchmark on all eligible algorithms).</small>
           <div class="input-group">
             <div class="pretty p-icon p-curve p-smooth p-plain">
                 <input id="fast" type="radio" name="speed" />
@@ -81,7 +81,31 @@
                 </div>
             </div>
           </div>
-          <div class="btn btn-default" id="advanced">Advanced</button>
+        </div>
+      </div>
+
+      <div class="row top-buffer">
+        <div class="col-xs-12 text-right">
+          <div class="btn btn-default" id="advanced">Advanced</button></div>
+        </div>
+      </div>
+
+      <div class="advanced hidden">
+        <div class="container-fluid">
+          <div class="row">
+            <div class="col-xs-12 text-right">
+              <button class="btn white closeAdvanced">X</button>
+            </div>
+            <div class="col-xs-12">
+              <h4>Advanced settings</h4>
+              <p>Here, you can customize intensity for each algorithm-miner pair. More options will be available as Hasher is updated. Use a single value to apply the same intensity to all your GPUs (e.g., <code>17.5</code>), or multiple values separated with a comma. For instance, <code>17.5,14</code> means GPU #0 will be affected <code>17.5</code> and GPU #1 <code>14</code>.<br>
+              <small class="text-alert">If you experience crashes, shutdowns or if benchmark does not succeed for some algorithms (i.e. you obtain 0H/s), you may try to reduce their intensity.</small></p>
+              <form class="form-inline intensity"></form>
+            </div>
+            <div class="col-xs-12">
+              <button class="btn primary closeAdvanced">Save</button>
+            </div>
+          </div>
         </div>
       </div>
     </div>

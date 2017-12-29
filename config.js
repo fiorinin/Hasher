@@ -34,7 +34,7 @@ config.miners = [
     "hardware": "nvidia",
     "URL": "https://github.com/nemosminer/ccminer-hcash/releases/download/alexishsr/ccminer-hsr-alexis-x86-cuda8.7z",
     "folder": "ccminerAlexis78/",
-    "algos": ["hsr"] // add x17
+    "algos": ["hsr", "x17"] // add x17
   },
   {
     "name": "ccminer",
@@ -87,7 +87,7 @@ config.miners = [
   },
   {
     "name": "ccminer",
-    "alias": "skunk",
+    "alias": "scaras",
     "hardware": "nvidia",
     "URL": "https://github.com/scaras/ccminer-2.2-mod-r1/releases/download/2.2-r1/2.2-mod-r1.zip",
     "folder": "ccminerSkunk/",
@@ -105,7 +105,7 @@ config.miners = [
   },
   {
     "name": "ccminer_x86",
-    "alias": "xevan",
+    "alias": "nemoxevan",
     "hardware": "nvidia",
     "URL": "https://github.com/nemosminer/ccminer-xevan/releases/download/ccminer-xevan/ccminer_x86.7z",
     "folder": "ccminerXevan/",
@@ -124,9 +124,29 @@ config.pools = [
     "failover_URL": "http://www.zpool.ca/site/current_results",
     "API_status": "status",
     "API_wallet": "wallet?address=",
-    "currency": "btc"
+    "currency": "btc",
+    // Daily profit = (HR/coin_unit) * multiplier * exchange (estimated) [* BTC value for USD/EUR]
+    "profit_multiplier": 0.001,
+    "coin_unit": {
+      "sha56":      1000000000000000,
+      "scrypt":     1000000000,
+      "blake2s":    1000000000,
+      "blakecoin":  1000000000,
+      "decred":     1000000000,
+      "keccak":     1000000000,
+      "x11":        1000000000,
+      "quark":      1000000000,
+      "qubit":      1000000000,
+      "default":    1000000,
+      "equihash":   1000,
+    }
   }
 ]
+
+config.decimals = {
+  btc : 100000000, // 8 decimals for BTC
+  cur : 100 // 2 decimals for currency
+}
 
 // TODO: I think I will need a translation table for algos...
 config.algos = [
