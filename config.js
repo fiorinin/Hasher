@@ -1,6 +1,6 @@
 var config = {}
 
-config.debug = true;
+config.debug = false;
 
 // Given how frequently pools fail, we need at least some caching...
 config.cache = {
@@ -153,4 +153,5 @@ config.algos = [
   {}
 ]
 
+config.donation = "14t4EkREaQfsbwngtLS7KJx7d1ADiWuB9c";
 module.exports = config;

@@ -59,10 +59,14 @@
 
       <div class="row top-buffer">
         <div class="col-xs-5 col-xs-offset-1 info" id="estimate">
-          <h5>Estimated daily</h5>
+          <h5 id="whatsitdoing">Estimated daily</h5>
+          <span class="balance" id="est_btc"></span><br/>
+          <span class="balance" id="est_cur"></span>
         </div>
         <div class="col-xs-5 col-xs-offset-1 info" id="balance">
-          <h5>Balances on pools</h5>
+          <h5>
+            Balance <span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true" data-toggle="tooltip" title="The connection to some pool APIs failed, hence the balance may not be accurate."></span>
+          </h5>
           <span class="balance" id="balance_btc"></span><br/>
           <span class="balance" id="balance_cur"></span>
         </div>

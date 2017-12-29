@@ -369,7 +369,7 @@ function benchmark() {
         var algo = miner.algos[aidx];
         var alias = `${algo}-${miner.alias}`
         if(enabled_algos[alias] && algosInPools[algo] !== undefined) {
-          cmds.push([alias, MiningUtils.buildCommand(binPath+miner.folder+miner.name, algo, intensities[alias], algosInPools[algo]["stratum"], gpus_to_use)]);
+          cmds.push([alias, MiningUtils.buildCommand(binPath+miner.folder+miner.name, algo, intensities[alias], algosInPools[algo]["stratum"], gpus_to_use, false)]);
         }
       }
     }

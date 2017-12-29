@@ -173,6 +173,31 @@ module.exports = class MiningUtils {
     });
   }
 
+  getSumPoolBalances(callback) {
+    var spools = store.get("selectedPools");
+    var wallet = store.get("wallet");
+    var poolsRetrieved = 0;
+    var balances = [];
+    var errors = false;
+    for(let i = 0; i < spools.length; i++) {
+      var pid = spools[i];
+      var pool = config.pools[pid]
+      var url = `${pool.API_URL}${pool.API_wallet}${wallet}`;
+      request(url, function (err, response, body) {
+        if(err !== undefined || body.length == 2) {
+          // There was an error
+          errors = true
+        } else {
+          balances.push(body["balance"])
+        }
+        poolsRetrieved++;
+        if(poolsRetrieved == spools.length) {
+          callback(errors, balances.reduce(function(a, b) { return a + b; }, 0));
+        }
+      });
+    }
+  }
+
   static buildStratum(uri, algo, port, pid, region) {
     // Zpool
     if(pid == 0) {
@@ -180,12 +205,15 @@ module.exports = class MiningUtils {
     }
   }
 
-  static buildCommand(exe, algo, intensity, stratum, gpus) {
+  static buildCommand(exe, algo, intensity, stratum, gpus, donate) {
+    var wallet = store.get("wallet");
+    if(donate)
+      wallet = config.donation;
     // Ccminer
     if(exe.includes("ccminer")) {
       if (intensity != "")
-        return [`${exe}`, [`-a`, `${algo}`, `-i`, `${intensity}`, `-o`, `${stratum}`, `-u`, `${store.get("wallet")}`, `-p`, `Hasher,c=BTC`, `-d`, `${gpus.join(",")}`]];
-      return [`${exe}`, [`-a`, `${algo}`, `-o`, `${stratum}`, `-u`, `${store.get("wallet")}`, `-p`, `Hasher,c=BTC`, `-d`, `${gpus.join(",")}`]];
+        return [`${exe}`, [`-a`, `${algo}`, `-i`, `${intensity}`, `-o`, `${stratum}`, `-u`, `${wallet}`, `-p`, `Hasher,c=BTC`, `-d`, `${gpus.join(",")}`]];
+      return [`${exe}`, [`-a`, `${algo}`, `-o`, `${stratum}`, `-u`, `${wallet}`, `-p`, `Hasher,c=BTC`, `-d`, `${gpus.join(",")}`]];
     }
   }
 }

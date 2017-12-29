@@ -47,3 +47,7 @@ It'd be nice to share optimal setups for each kind of hardware. E.g., for 1080Ti
 * Option to pick estimation
 * Option to pick refresh
 * config.js is in form {"name":"xyz",...}, instead of name: {...}
+* Hashing speed is based on 5 last reported HR by miner
+* If you experience slowdowns, you might want to minimize the app. Mining speed is not altered and you might get a better experience using your PC in the meantime.
+* Grey buttons when mining
+* USD should be 2 decimals
