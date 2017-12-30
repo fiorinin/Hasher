@@ -203,6 +203,9 @@ var table = $("#algos").DataTable({
     "searching":   false,
     "paging":   false,
     "info":     false,
+    "language": {
+      "zeroRecords": "Loading data - please wait..."
+    },
     "aoColumns":[
       {"sType":"string"},
       {"orderable": false},

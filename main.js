@@ -89,13 +89,14 @@ if (typeof store.get('estimate') === 'undefined') {
 if (typeof store.get('langPools') === 'undefined') {
   var langPools = [];
   for(var idx in config.pools) {
+    pregions = [];
     if(config.pools[idx].regions !== undefined) {
-      pregions = [];
       for (var ridx in config.pools[idx].regions) {
-        pregions.push(0);
+        pregions.push(false);
       }
-      langPools.push(pregions);
+      pregions[0] = true;
     }
+    langPools.push(pregions);
   }
   store.set("langPools", langPools);
 }

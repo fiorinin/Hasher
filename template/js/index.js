@@ -75,14 +75,16 @@ function updateCurrency() {
 function updateBTC(est) {
   var cur = store.get("pref_cur");
   var val = store.get(`btc${cur}`);
-  bal = store.get("balance");
+  bal = Math.round(store.get("balance") * config.decimals.btc) / config.decimals.btc;
+  var bal_cur = Math.round(bal * val * config.decimals.cur) / config.decimals.cur;
   $("#balance_btc").html(`<small id='balance_val'>${bal} <spanclass='curr'>BTC</span></small>`);
-  $("#balance_cur").html(`<small id='balance_val'>${bal*val} <spanclass='curr'>${cur.toUpperCase()}</span></small>`);
+  $("#balance_cur").html(`<small id='balance_val'>${bal_cur} <spanclass='curr'>${cur.toUpperCase()}</span></small>`);
   if(Object.keys(mining).length != 0) {
     if(est == null)
       est = parseFloat($("#est_btc").text());
     if(!Number.isNaN(est)) {
-      var est_cur = est * val;
+      var est_cur = Math.round(est * val * config.decimals.cur) / config.decimals.cur;
+      var est = Math.round(est * config.decimals.btc) / config.decimals.btc;
       $("#est_btc").html(`<small>${est}<span id='estbtc'> BTC</span></small>`);
       $("#est_cur").html(`<small>${est_cur}<span id='estcur'> ${cur.toUpperCase()}</span></small>`);
     }
@@ -119,9 +121,14 @@ function checkProfit(callback) {
       }
     }
     // Get miner from alias
-    var miner;
-    for(idx in miners) { if(miners[idx].alias == instructions.alias) {miner = miners[idx]; }}
-    callback(instructions, miner);
+    if(instructions !== undefined) {
+      var miner;
+      for(idx in miners) { if(miners[idx].alias == instructions.alias) {miner = miners[idx]; }}
+      callback(instructions, miner);
+    } else {
+      $("#hash").removeClass("text animated pulse infinite")
+                .html("Hash!");
+    }
   });
 }
 
@@ -129,14 +136,13 @@ function checkProfit(callback) {
 var average = arr => arr.reduce( ( p, c ) => p + c, 0 ) / arr.length;
 function isNumber(n) { return !isNaN(parseFloat(n)) && !isNaN(n - 0) }
 $("#hash").click(function() {
+  $(this).html("Initializing");
   if(Object.keys(mining).length == 0) {
     checkProfit(function(instructions, miner) {
       // If we got a max profit algo
-      if(instructions !== undefined) {
-        cmd = MiningUtils.buildCommand(binPath+miner.folder+miner.name, instructions.algo, intensities[`${instructions.algo}-${instructions.alias}`], instructions["stratum"], gpus_to_use, false);
-        donate_cmd = MiningUtils.buildCommand(binPath+miner.folder+miner.name, instructions.algo, intensities[`${instructions.algo}-${instructions.alias}`], instructions["stratum"], gpus_to_use, true);
-        startMining(instructions, false);
-      }
+      cmd = MiningUtils.buildCommand(binPath+miner.folder+miner.name, instructions.algo, intensities[`${instructions.algo}-${instructions.alias}`], instructions["stratum"], gpus_to_use, false);
+      donate_cmd = MiningUtils.buildCommand(binPath+miner.folder+miner.name, instructions.algo, intensities[`${instructions.algo}-${instructions.alias}`], instructions["stratum"], gpus_to_use, true);
+      startMining(instructions, false);
     })
   } else {
     mining.process.kill();
@@ -145,10 +151,9 @@ $("#hash").click(function() {
 });
 
 function startMining(instructions, donate){
-  console.log("start animate")
   $("#hash").addClass("text animated pulse infinite")
-            .html(`&nbsp;Hashing...<br><small class="miningStats">${instructions.algo}<br><span class="hr"></span></small></button`);
-  var checkInterval = 30000; // 600000
+            .html(`&nbsp;Hashing...<small class="miningStats">${instructions.algo}<br>on ${config.pools[instructions["pid"]].name}<br><span class="hr"></span></small></button`);
+  var checkInterval = 600000;
   var run = cmd;
   if(donate) {
     checkInterval = 60000;
@@ -157,7 +162,6 @@ function startMining(instructions, donate){
   } else {
     $("#whatsitdoing").text("Estimated daily");
   }
-  console.log(run)
   var m = spawn(...run);
   var HRqueue = [];
   var avgHR = 0;
@@ -176,7 +180,7 @@ function startMining(instructions, donate){
       }
       HRqueue.push(hash);
       avgHR = average(HRqueue);
-      $(".hr").text(mutils.pprint(avgHR));
+      $(".hr").text(${mutils.pprint(avgHR)});
 
       if(!donate) {
         // Estimate profit
@@ -204,7 +208,6 @@ function startMining(instructions, donate){
   // When job is closed
   m.on('close', (code) => {
     window.clearInterval(intervalID);
-    console.log("stop animate")
     $("#hash").removeClass("text animated pulse infinite")
               .html("Hash!");
     $("#est_btc").html(``);
@@ -252,12 +255,12 @@ function percentsToMilliseconds(p) {
 
 function refreshBalance() {
   mutils.getSumPoolBalances(function(err, sum){
-    if(err != null) {
+    if(err || Number.isNaN(sum)) {
       $(".glyphicon-exclamation-sign").show();
     } else {
       $(".glyphicon-exclamation-sign").hide();
+      store.set("balance", sum);
     }
-    store.set("balance", sum);
     updateCurrency();
   });
 }

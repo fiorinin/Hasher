@@ -117,7 +117,6 @@ config.miners = [
 config.pools = [
   {
     "name": "zpool",
-    // "regions": [["US","us"], ["EU","eu"], ["Asia","asia"]],
     "home_URL": "http://www.zpool.ca/",
     "mine_URL": "mine.zpool.ca",
     "API_URL": "http://www.zpool.ca/api/",
@@ -139,6 +138,54 @@ config.pools = [
       "qubit":      1000000000,
       "default":    1000000,
       "equihash":   1000,
+    }
+  },
+  {
+    "name": "aHashPool",
+    "home_URL": "https://www.ahashpool.com/",
+    "mine_URL": "mine.ahashpool.com",
+    "API_URL": "http://www.ahashpool.com/api/",
+    "failover_URL": "https://www.ahashpool.com/home_current_results.php",
+    "API_status": "status",
+    "API_wallet": "wallet?address=",
+    "currency": "btc",
+    "profit_multiplier": 0.001,
+    "coin_unit": {
+      "blake2s":    1000000000,
+      "blakecoin":  1000000000,
+      "default":    1000000,
+      "yescrypt":   1000,
+    }
+  },
+  {
+    "name": "HashRefinery",
+    "home_URL": "http://pool.hashrefinery.com/",
+    "mine_URL": "us.hashrefinery.com",
+    "API_URL": "http://pool.hashrefinery.com/api/",
+    "failover_URL": "http://pool.hashrefinery.com/site/current_results",
+    "API_status": "status",
+    "API_wallet": "wallet?address=",
+    "currency": "btc",
+    "profit_multiplier": 0.001,
+    "coin_unit": {
+      "sha56":      1000000000,
+      "blake2s":    1000000000,
+      "blakecoin":  1000000000,
+      "default":    1000000
+    }
+  },
+  {
+    "name": "NiceHash",
+    "regions": ["usa", "eu", "hk", "jp", "in", "br"],
+    "home_URL": "https://www.nicehash.com/",
+    "mine_URL": "nicehash.com",
+    "API_URL": "https://api.nicehash.com/api",
+    "API_status": "?method=simplemultialgo.info",
+    "API_wallet": "?method=stats.provider&addr=",
+    "currency": "btc",
+    "profit_multiplier": 0.001,
+    "coin_unit": {
+      "default":    1000000
     }
   }
 ]

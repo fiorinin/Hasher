@@ -237,4 +237,6 @@ a.list-group-item.active, a.list-group-item.active:hover, a.list-group-item.acti
   font-family: "rawline", sans-serif;
   font-weight: 200;
   font-size: 10px;
+  display:block;
+  height:40px;
 }
