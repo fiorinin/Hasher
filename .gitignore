@@ -1,5 +1,7 @@
 # Hasher
 notesToSelf.md
+dist/
+*.tgz
 
 # Logs
 logs

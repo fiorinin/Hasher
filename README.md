@@ -24,10 +24,9 @@ MultiPoolMiner: 1MsrCoAt8qM53HUMsUxvy9gMj3QVbHLazH*
 
 ## Installation
 1. Download the latest version at https://github.com/Johy/Hasher/releases
-2. Put it some place convenient for you like your documents or desktop
-3. Hasher has a few dependencies (listed below) that you need to make sure to have
-4. Double-click on the application
-5. Follow the introductory setup, and enjoy!
+2. Hasher has a few dependencies (listed below) that you need to make sure to have
+4. Double-click on the `.exe` application. A quick install will start, create a shortcut on your Desktop and launch it
+5. Follow the introductory setup in Hasher, and enjoy!
 
 <sup><sub>**If you prefer not to use a .exe file for security purposes, which I understand, you can download the zip at the same URL, uncompress it and follow the steps in the FAQ.**</sub></sup>
 
@@ -43,6 +42,12 @@ MultiPoolMiner: 1MsrCoAt8qM53HUMsUxvy9gMj3QVbHLazH*
 * I am working on a logging system so that users can better share their issues if any. This will help me to be more responsive to fix these issues.
 
 ## Frequently Asked Questions
+###### What's this naming convention for miners and algorithms?
+Since Hasher allows you to use multiple miners on the same algorithm, I used the following naming convention `<algo>-<miner_fork>` for clarity. In the performance tab, you can reorder all pairs by hashrate, profit, etc. So the naming shouldn't bother you much as you can very quickly see which algorithms/miners are the best fit for you. This strategy guarantees that virtually any hardware gets the best hashrate, compared to forcing you to use a given miner for a given algorithm.
+
+###### I experience slowdowns, shutdowns or crashes, what's going on?
+Hasher is not really resource hungry, but it _is_ by definition heavier than a `.bat` command. If you experience slowdowns, you might want to minimize the app - it has been effective when the display runs on the mining GPU since it gets rid of animations. Note however that I could not see any impact of Hasher on the mining speed at all (minimized or not), you just might get a better experience using your PC in the meantime (similar to when you mine with `.bat`).
+
 ###### Mining doesn't work, what should I do?
 A lot of things could have gone wrong. You could be trying to run Nvidia miners on AMD hardware, picked only algorithms that the pool(s) you selected don't support, etc. I am currently working on integrating logging, so that you will be able to share what Hasher has to say about your issues. In the meantime, you can [report an issue](https://github.com/Johy/Hasher/issues) by being as comprehensive as you can and explaining how to reproduce the error. If some specific algorithms don't work, try reducing their intensity in the advanced settings, or simply deselect them for Hasher to stop trying to mine with it.
 
@@ -51,6 +56,18 @@ This depends heavily on you, actually. Benchmarking is simple: Hasher runs algor
 
 ###### My balance is different from the pool value, why?
 The balance displayed is **shared across all selected pools**. If you are using a single pool and the value is different, there is likely a network error (check for the warning symbol in the balance box) and Hasher could not update this value. The pool website will always display the correct value.
+
+###### How is the profit estimated?
+For each algorithm-miner pair you have benchmarked, Hasher will search eligible pools among those you have selected. It will compare their potential profit by using their API, and using the `actual_last24h` field. This has proven to be the most reliable estimate, but I do plan to allow users to switch it to `current_estimate` or `estimate_last24h`. Then, it will select the algorithm-miner pair that would yield the maximum profit given the pool estimates.
+
+###### How is the hashrate calculated?
+The hashrate is always the one provided by the miner. In `Performance` section, it is the average hashrate for the benchmark period (see above). When you mine, it is the average of the last 5 values reported by the miner.
+
+###### How frequently does Hasher check profit?
+By default, every 10mins, but I am planning to add a setting for this so you can pick any value within an interval.
+
+###### What about donations?
+By default, 1% of your mining is donated to support Hasher. This represents 14mins of a full day of mining. Donation occurs every 10 hours of mining, so you can benchmark, test the app and play around freely. You can increase it (~wow much love~), or set it to 0. You can also directly donate at this address: 14t4EkREaQfsbwngtLS7KJx7d1ADiWuB9c. Donations really help this project, so thank you!
 
 ###### Where are Hasher's files stored?
 Apart from the executable you download, Hasher uses the following path to download miners, store your settings, caches, etc.: ```C:\Users\<USER>\AppData\Roaming\Hasher```. Feel free to have a look and delete it if you plan not to use Hasher anymore. Note that removing this folder will delete all your settings and you will have to go through the introduction again and benchmark your hardware if you want to use Hasher again.
