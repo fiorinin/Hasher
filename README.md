@@ -28,6 +28,7 @@ MultiPoolMiner: 1MsrCoAt8qM53HUMsUxvy9gMj3QVbHLazH*
 3. Hasher has a few dependencies (listed below) that you need to make sure to have
 4. Double-click on the application
 5. Follow the introductory setup, and enjoy!
+<sup><sub>If you prefer not to use a .exe file for security purposes, which I understand, you can download the zip at the same URL, uncompress it and follow the steps in the FAQ.</sub></sup>
 
 ## Dependencies
 * CUDA 9 binaries require Nvidia drivers 384.xx or more recent

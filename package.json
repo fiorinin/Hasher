@@ -1,7 +1,7 @@
 {
   "name": "Hasher",
   "version": "0.1.3",
-  "description": "A simple GUI integrating multiple miners for a simple and effective mining experience.",
+  "description": "A simple yet comprehensive interface that benchmarks your hardware, downloads and run miners for you to effectively mine the most profitable coin on the most profitable pool.",
   "main": "main.js",
   "scripts": {
     "start": "electron ."
@@ -27,13 +27,11 @@
     "async": "^2.6.0",
     "bootstrap": "^3.3.7",
     "electron-debug": "^1.4.0",
-    "electron-packager": "^10.1.0",
     "electron-store": "^1.3.0",
     "fs-extra": "^5.0.0",
     "https": "^1.0.0",
     "jquery": "^3.2.1",
     "jsdom": "^11.5.1",
-    "nuts": "^0.25.0",
     "pretty-checkbox": "^3.0.3",
     "progressbar.js": "^1.0.1",
     "request": "^2.83.0",
