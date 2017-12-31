@@ -67,7 +67,7 @@ The hashrate is always the one provided by the miner. In `Performance` section, 
 By default, every 10mins, but I am planning to add a setting for this so you can pick any value within an interval.
 
 ###### What about donations?
-By default, 1% of your mining is donated to support Hasher. This represents 14mins of a full day of mining. Donation occurs every 10 hours of mining, so you can benchmark, test the app and play around freely. You can increase it (\~wow much love\~), or set it to 0. You can also directly donate at this address: 14t4EkREaQfsbwngtLS7KJx7d1ADiWuB9c. Donations really help this project, so thank you!
+By default, 1% of your mining is donated to support Hasher. This represents 14mins of a full day of mining. Donation occurs every 10 hours of mining, so you can benchmark, test the app and play around freely. You can increase it (\~wow much love\~), or set it to 0. You can also directly donate at this address: **14t4EkREaQfsbwngtLS7KJx7d1ADiWuB9c**. Donations really help this project, so thank you!
 
 ###### Where are Hasher's files stored?
 Apart from the executable you download, Hasher uses the following path to download miners, store your settings, caches, etc.: ```C:\Users\<USER>\AppData\Roaming\Hasher```. Feel free to have a look and delete it if you plan not to use Hasher anymore. Note that removing this folder will delete all your settings and you will have to go through the introduction again and benchmark your hardware if you want to use Hasher again.
