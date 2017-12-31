@@ -92,7 +92,6 @@ module.exports = class MiningUtils {
           algos.forEach( function(obj) {
             var algo = obj["algo"];
             var port = obj["port"];
-
             if(algosInPools[algo] === undefined && unique) {
               // Add this item to the list to benchmark potentially
               algosInPools[algo] = {"stratum": MiningUtils.buildStratum(pool.mine_URL, algo, port, pid, region), "current_estimate": obj["current_estimate"], "24h_estimated": obj["24h_estimated"], "24h_actual": obj["24h_actual"]};

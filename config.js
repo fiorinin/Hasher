@@ -1,6 +1,6 @@
 var config = {}
 
-config.debug = false;
+config.debug = true;
 
 // Given how frequently pools fail, we need at least some caching...
 config.cache = {

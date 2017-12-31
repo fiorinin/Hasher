@@ -180,7 +180,7 @@ function startMining(instructions, donate){
       }
       HRqueue.push(hash);
       avgHR = average(HRqueue);
-      $(".hr").text(${mutils.pprint(avgHR)});
+      $(".hr").text(mutils.pprint(avgHR));
 
       if(!donate) {
         // Estimate profit
@@ -227,10 +227,10 @@ function startMining(instructions, donate){
           sw = true;
         // If we decide to switch algos
         if(sw) {
-          cmd = MiningUtils.buildCommand(binPath+miner.folder+miner.name, new_instructions.algo, intensities[`${new_instructions.algo}-${new_instructions.alias}`], instructions["stratum"], gpus_to_use, false);
-          donate_cmd = MiningUtils.buildCommand(binPath+miner.folder+miner.name, new_instructions.algo, intensities[`${new_instructions.algo}-${new_instructions.alias}`], instructions["stratum"], gpus_to_use, true);
+          cmd = MiningUtils.buildCommand(binPath+miner.folder+miner.name, new_instructions.algo, intensities[`${new_instructions.algo}-${new_instructions.alias}`], new_instructions["stratum"], gpus_to_use, false);
+          donate_cmd = MiningUtils.buildCommand(binPath+miner.folder+miner.name, new_instructions.algo, intensities[`${new_instructions.algo}-${new_instructions.alias}`], new_instructions["stratum"], gpus_to_use, true);
           mining.process.kill();
-          setTimeout(function(){ startMining(new_instructions, false); }, 5000); // Kiil needs times...
+          setTimeout(function(){startMining(new_instructions, false);}, 5000); // Kiil needs times...
         }
         else if(store.get("donation") > 0 && now - mining.start > 86400000) {
           mining.process.kill();
