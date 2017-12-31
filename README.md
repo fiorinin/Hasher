@@ -17,9 +17,9 @@ A simple yet comprehensive interface that benchmarks your hardware, downloads an
 
 *This is a free project I developed for myself out of entertainment, new technology enthusiasm and personal needs. While I plan to improve this project, I greatly appreciate bitcoin donations to support the project: **14t4EkREaQfsbwngtLS7KJx7d1ADiWuB9c***
 
-<sub><sup>Before creating Hasher, I used [NemosMiner](https://github.com/nemosminer/NemosMiner-v2.3) and [MultiPoolMiner](https://github.com/MultiPoolMiner/MultiPoolMiner). I got the inspiration for Hasher from them and wanted additional features as above. Therefore, I'd like to thank them, and you can too by donating bitcoin:  
+Before creating Hasher, I used [NemosMiner](https://github.com/nemosminer/NemosMiner-v2.3) and [MultiPoolMiner](https://github.com/MultiPoolMiner/MultiPoolMiner). I got the inspiration for Hasher from them and wanted additional features as above. Therefore, I'd like to thank them, and you can too by donating bitcoin:  
 NemosMiner: 1QGADhdMRpp9Pk5u5zG1TrHKRrdK5R81TE  
-MultiPoolMiner: 1MsrCoAt8qM53HUMsUxvy9gMj3QVbHLazH*</sup></sub>
+MultiPoolMiner: 1MsrCoAt8qM53HUMsUxvy9gMj3QVbHLazH*
 
 
 ## Installation
