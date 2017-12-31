@@ -137,6 +137,7 @@ var average = arr => arr.reduce( ( p, c ) => p + c, 0 ) / arr.length;
 function isNumber(n) { return !isNaN(parseFloat(n)) && !isNaN(n - 0) }
 $("#hash").click(function() {
   $(this).html("Initializing");
+  $(".menu").prop( "disabled", true );
   if(Object.keys(mining).length == 0) {
     checkProfit(function(instructions, miner) {
       // If we got a max profit algo
@@ -145,6 +146,7 @@ $("#hash").click(function() {
       startMining(instructions, false);
     })
   } else {
+    $(".menu").prop( "disabled", false );
     mining.process.kill();
     mining = {};
   }
@@ -212,6 +214,7 @@ function startMining(instructions, donate){
               .html("Hash!");
     $("#est_btc").html(``);
     $("#est_cur").html(``);
+    $(".menu").prop( "disabled", false );
   });
 
   // Update BTC price and balances every 10mins
@@ -230,20 +233,22 @@ function startMining(instructions, donate){
           cmd = MiningUtils.buildCommand(binPath+miner.folder+miner.name, new_instructions.algo, intensities[`${new_instructions.algo}-${new_instructions.alias}`], new_instructions["stratum"], gpus_to_use, false);
           donate_cmd = MiningUtils.buildCommand(binPath+miner.folder+miner.name, new_instructions.algo, intensities[`${new_instructions.algo}-${new_instructions.alias}`], new_instructions["stratum"], gpus_to_use, true);
           mining.process.kill();
-          setTimeout(function(){startMining(new_instructions, false);}, 5000); // Kiil needs times...
+          setTimeout(function(){startMining(new_instructions, false);}, 5000); // Kiil needs time...
         }
-        else if(store.get("donation") > 0 && now - mining.start > 86400000) {
+        // It's been 10hrs
+        else if(store.get("donation") > 0 && now - mining.start > 36000000) {
           mining.process.kill();
           mining = {};
-          setTimeout(function(){ startMining(instructions, true); }, 5000); // Kiil needs times...
+          setTimeout(function(){ startMining(instructions, true); }, 5000); // Kiil needs time...
         }
       });
     } else {
       // Donated enough
-      if(now - mining.start > percentsToMilliseconds(store.get("donation"))) {
+      // We donate 42% of the daily donation amount every 10hrs
+      if(now - mining.start > percentsToMilliseconds(store.get("donation")*0.42)) {
         mining.process.kill();
         mining = {};
-        setTimeout(function(){ startMining(instructions, false); }, 5000); // Kiil needs times...
+        setTimeout(function(){ startMining(instructions, false); }, 5000); // Kiil needs time...
       }
     }
   }, checkInterval);

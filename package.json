@@ -12,7 +12,7 @@
   "build": {
     "appId": "Hasher",
     "win": {
-      "icon": "./build/icon"
+      "icon": "./build/hasher_icon"
     }
   },
   "repository": "https://github.com/Johy/Hasher",
