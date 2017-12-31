@@ -1,6 +1,6 @@
 {
   "name": "Hasher",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "A simple GUI integrating multiple miners for a simple and effective mining experience.",
   "main": "main.js",
   "scripts": {
