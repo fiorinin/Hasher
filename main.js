@@ -18,7 +18,7 @@ function createWindow () {
     store.set("gpus", gpus);
     mainWindow.webContents.send('gpus', "ok");
   })
-  mainWindow = new BrowserWindow({width: 600, height: 440, resizable: config.debug});
+  mainWindow = new BrowserWindow({width: 600, height: 470, resizable: config.debug});
   mainWindow.setMenu(null);
 
   mainWindow.loadURL(url.format({

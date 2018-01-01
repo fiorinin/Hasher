@@ -52,7 +52,7 @@ Hasher is not really resource hungry, but it _is_ by definition heavier than a `
 A lot of things could have gone wrong. You could be trying to run Nvidia miners on AMD hardware, picked only algorithms that the pool(s) you selected don't support, etc. I am currently working on integrating logging, so that you will be able to share what Hasher has to say about your issues. In the meantime, you can [report an issue](https://github.com/Johy/Hasher/issues) by being as comprehensive as you can and explaining how to reproduce the error. If some specific algorithms don't work, try reducing their intensity in the advanced settings, or simply deselect them for Hasher to stop trying to mine with it.
 
 ###### How long does benchmarking take? Can I speed it up?
-This depends heavily on you, actually. Benchmarking is simple: Hasher runs algorithms (you pick) on compatible pools (you selected) for a given amount of time (that you set) and stores the average hashrate(s) reported by the miner(s). You can choose among 3 benchmarking speeds (30s, 2mins or 3mins), and longer benchmarks will be more robust for estimating profits. Feel free to adapt your strategy to fit your needs by (de)selecting algorithms, changing speed, etc. Note that all mining done while benchmarking is credited to your wallet in the respective pool(s).
+This depends heavily on you, actually. Benchmarking is simple: Hasher runs algorithms (you pick) on compatible pools (you selected) for a given amount of time (that you set) and stores the average hashrate(s) reported by the miner(s). You can choose among 3 benchmarking speeds (30s, 2mins or 3mins), and longer benchmarks will be more robust for estimating profits. Feel free to adapt your strategy to fit your needs by (de)selecting algorithms, changing speed, etc. I personally recommend running a quick benchmark first with everything by default, and then fine tune it by adjusting intensities and running longer benchmarks on algorithms that performed well and those that failed - sometimes, a too short benchmark prevents Hasher to get any speed data. Note that all mining done while benchmarking is credited to your wallet in the respective pool(s).
 
 ###### My balance is different from the pool value, why?
 The balance displayed is **shared across all selected pools**. If you are using a single pool and the value is different, there is likely a network error (check for the warning symbol in the balance box) and Hasher could not update this value. The pool website will always display the correct value.
@@ -67,13 +67,20 @@ The hashrate is always the one provided by the miner. In `Performance` section, 
 By default, every 10mins, but I am planning to add a setting for this so you can pick any value within an interval.
 
 ###### What about donations?
-By default, 1% of your mining is donated to support Hasher. This represents 14mins of a full day of mining. Donation occurs every 10 hours of mining, so you can benchmark, test the app and play around freely. You can increase it (\~wow much love\~), or set it to 0. You can also directly donate at this address: **14t4EkREaQfsbwngtLS7KJx7d1ADiWuB9c**. Donations really help this project, so thank you!
+By default, 1% of your mining is donated to support Hasher. This represents 14mins of a full day of mining. Donation occurs every 10 hours of mining (i.e. 6mins every 10hrs by default), so you can benchmark, test the app and play around freely. You can increase it (\~wow much love\~), or set it to 0. You can also directly donate at this address: **14t4EkREaQfsbwngtLS7KJx7d1ADiWuB9c**. Donations really help this project, so thank you!
 
 ###### Where are Hasher's files stored?
 Apart from the executable you download, Hasher uses the following path to download miners, store your settings, caches, etc.: ```C:\Users\<USER>\AppData\Roaming\Hasher```. Feel free to have a look and delete it if you plan not to use Hasher anymore. Note that removing this folder will delete all your settings and you will have to go through the introduction again and benchmark your hardware if you want to use Hasher again.
 
 ###### I want to contribute!
-Amazing, thank you really! You are welcome to browse, download and improve the code as you wish. It's still messy so far but as soon as I get all the features I want, I'll clean it up deeply. To run the code, you should have Node.js (esp., the npm command). Then, you can run these commands to download, install and start a local version of the source code:
+Amazing, thank you really! You are welcome to browse, download and improve the code as you wish. It's still messy so far but as soon as I get all the features I want, I'll clean it up deeply. To run the code, you should have [Node.js](https://nodejs.org), then download the latest release, uncompress it and run:
+```
+cd /path/to/Hasher/
+npm install
+npm start
+```
+
+If you have [Git](https://git-scm.com/), then you can run these commands in a directory of your choice to download, install and start a local version of the source code:
 ```
 git clone https://github.com/Johy/Hasher.git
 cd Hasher

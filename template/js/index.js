@@ -20,6 +20,7 @@ var mining = {};
 var cmd;
 var donate_cmd;
 var intervalID;
+var relaunch = {};
 
 $("#version").text("Hasher v"+store.get("version"))
 $(".menu").click(function() {
@@ -147,14 +148,29 @@ $("#hash").click(function() {
     })
   } else {
     $(".menu").prop( "disabled", false );
+    relaunch.do = false;
     mining.process.kill();
     mining = {};
   }
 });
 
+function estimateProfit(instructions, avgHR) {
+  var pid = instructions["pid"];
+  var pool = config.pools[pid];
+  var coin_unit = pool.coin_unit.default;
+  if (pool.coin_unit[instructions.algo] !== undefined) {
+    coin_unit = pool.coin_unit[instructions.algo];
+  }
+
+  var btc = avgHR / coin_unit * instructions[estimate] * pool.profit_multiplier
+  var est_btc = Math.round(btc * config.decimals.btc) / config.decimals.btc;
+  updateBTC(est_btc);
+}
+
 function startMining(instructions, donate){
   $("#hash").addClass("text animated pulse infinite")
             .html(`&nbsp;Hashing...<small class="miningStats">${instructions.algo}<br>on ${config.pools[instructions["pid"]].name}<br><span class="hr"></span></small></button`);
+  $(".menu").prop( "disabled", true );
   var checkInterval = 600000;
   var run = cmd;
   if(donate) {
@@ -171,12 +187,10 @@ function startMining(instructions, donate){
   if(mining.start === undefined)
     mining.start = Date.now();
   mining.cmd = run;
+
   m.stdout.on('data', (data) => {
-    hash = mutils.getHashrate(cmd[0], new TextDecoder("utf-8").decode(data));
-    if (config.debug == true) {
-      console.log(hash);
-    }
-    if(isNumber(hash)) {
+    hash = mutils.process(cmd[0], data);
+    if(hash !== undefined) {
       if(HRqueue.length == 5) {
         HRqueue.shift();
       }
@@ -185,25 +199,23 @@ function startMining(instructions, donate){
       $(".hr").text(mutils.pprint(avgHR));
 
       if(!donate) {
-        // Estimate profit
-        var pid = instructions["pid"];
-        var pool = config.pools[pid];
-        var coin_unit = pool.coin_unit.default;
-        if (pool.coin_unit[instructions.algo] !== undefined) {
-          coin_unit = pool.coin_unit[instructions.algo];
-        }
-
-        var btc = avgHR / coin_unit * instructions[estimate] * pool.profit_multiplier
-        var est_btc = Math.round(btc * config.decimals.btc) / config.decimals.btc;
-        updateBTC(est_btc);
+        estimateProfit(instructions, avgHR);
       }
     }
   });
-
   m.stderr.on('data', (data) => {
-    err = new TextDecoder("utf-8").decode(data);
-    if (config.debug == true) {
-      console.log(`Error: ${err}`);
+    hash = mutils.process(cmd[0], data);
+    if(hash !== undefined) {
+      if(HRqueue.length == 5) {
+        HRqueue.shift();
+      }
+      HRqueue.push(hash);
+      avgHR = average(HRqueue);
+      $(".hr").text(mutils.pprint(avgHR));
+
+      if(!donate) {
+        estimateProfit(instructions, avgHR);
+      }
     }
   });
 
@@ -215,6 +227,9 @@ function startMining(instructions, donate){
     $("#est_btc").html(``);
     $("#est_cur").html(``);
     $(".menu").prop( "disabled", false );
+    if(relaunch.do == true) {
+      startMining(relaunch.inst, relaunch.donate);
+    }
   });
 
   // Update BTC price and balances every 10mins
@@ -232,23 +247,29 @@ function startMining(instructions, donate){
         if(sw) {
           cmd = MiningUtils.buildCommand(binPath+miner.folder+miner.name, new_instructions.algo, intensities[`${new_instructions.algo}-${new_instructions.alias}`], new_instructions["stratum"], gpus_to_use, false);
           donate_cmd = MiningUtils.buildCommand(binPath+miner.folder+miner.name, new_instructions.algo, intensities[`${new_instructions.algo}-${new_instructions.alias}`], new_instructions["stratum"], gpus_to_use, true);
+          relaunch.do = true;
+          relaunch.inst = new_instructions;
+          relaunch.donate = false;
           mining.process.kill();
-          setTimeout(function(){startMining(new_instructions, false);}, 5000); // Kiil needs time...
         }
         // It's been 10hrs
         else if(store.get("donation") > 0 && now - mining.start > 36000000) {
+          relaunch.do = true;
+          relaunch.inst = instructions;
+          relaunch.donate = true;
+          mining = {}; // Resets the timer so we can know donation time
           mining.process.kill();
-          mining = {};
-          setTimeout(function(){ startMining(instructions, true); }, 5000); // Kiil needs time...
         }
       });
     } else {
       // Donated enough
       // We donate 42% of the daily donation amount every 10hrs
       if(now - mining.start > percentsToMilliseconds(store.get("donation")*0.42)) {
+        relaunch.do = true;
+        relaunch.inst = instructions;
+        relaunch.donate = false;
+        mining = {}; // Resets the timer for another 10hrs
         mining.process.kill();
-        mining = {};
-        setTimeout(function(){ startMining(instructions, false); }, 5000); // Kiil needs time...
       }
     }
   }, checkInterval);

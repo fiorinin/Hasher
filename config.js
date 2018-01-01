@@ -1,6 +1,6 @@
 var config = {}
 
-config.debug = false;
+config.debug = true;
 
 // Given how frequently pools fail, we need at least some caching...
 config.cache = {
@@ -34,7 +34,7 @@ config.miners = [
     "hardware": "nvidia",
     "URL": "https://github.com/nemosminer/ccminer-hcash/releases/download/alexishsr/ccminer-hsr-alexis-x86-cuda8.7z",
     "folder": "ccminerAlexis78/",
-    "algos": ["hsr", "x17"] // add x17
+    "algos": ["blake2s", "blakecoin", "hsr", "veltor", "lyra2v2", "myr-gr", "nist5", "sib", "skein", "c11", "x17"]
   },
   {
     "name": "ccminer",

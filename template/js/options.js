@@ -4,6 +4,7 @@ var WAValidator = require('wallet-address-validator');
 var config = store.get("config");
 
 var miners = config.miners;
+var intensities = store.get("intensities");
 
 wal = store.get("wallet");
 if (wal !== undefined) {
@@ -36,6 +37,7 @@ $("#nvidia").change(function() {
     store.set("hardware", hardware);
   }
   reloadSpeeds();
+  reloadAlgos();
 })
 
 $("#amd").change(function() {
@@ -44,6 +46,7 @@ $("#amd").change(function() {
     store.set("hardware", hardware);
   }
   reloadSpeeds();
+  reloadAlgos();
 });
 
 var benchtime = store.get("benchtime");
@@ -88,10 +91,6 @@ function reloadSpeeds() {
 reloadSpeeds();
 
 // Advanced options
-var intensities = store.get("intensities");
-if (intensities === undefined) {
-  intensities = {};
-}
 $("#advanced").click(function() {
   $(".advanced").removeClass("hidden");
 })
@@ -100,44 +99,58 @@ $(".closeAdvanced").click(function() {
     var algo = $(this).attr("id");
     intensities[algo] = $(this).val();
   });
-  store.set("intensities", intensities);
+  if(intensities !== undefined) {
+    store.set("intensities", intensities);
+  }
   $(".advanced").addClass("hidden");
 })
 
-// Duplicate from performance, should be optimized
-listedAlgos = [];
-for (var i = 0; i < miners.length; i++) {
-  var miner = miners[i];
-  if(miner.hardware == hardware) {
-    for(var j = 0; j < miner.algos.length; j++) {
-      var algo = `${miner.algos[j]}-${miner.alias}`;
-      if(listedAlgos.indexOf(algo) == -1) {
-        listedAlgos.push(algo);
+if(hardware !== undefined) {
+  reloadAlgos();
+}
+
+function reloadAlgos() {
+  listedAlgos = [];
+  for (var i = 0; i < miners.length; i++) {
+    var miner = miners[i];
+    if(miner.hardware == hardware) {
+      for(var j = 0; j < miner.algos.length; j++) {
+        var algo = `${miner.algos[j]}-${miner.alias}`;
+        if(listedAlgos.indexOf(algo) == -1) {
+          listedAlgos.push(algo);
+        }
       }
     }
   }
-}
-listedAlgos.sort();
-for(var i = 0; i < listedAlgos.length; i++) {
-  var algo = listedAlgos[i];
-  var row = $(`<div class="row">`);
-  var val = intensities[algo] === undefined ? "" : intensities[algo];
-  var input = `<div class="col-xs-6"><div class="input-group input-group-xs">
-                <span class="input-group-addon" id="basic-addon1">${algo}</span>
-                <input type="text" id="${algo}" class="intensity_val form-control" aria-describedby="basic-addon1" value="${val}">
-              </div></div>`;
-  if(i % 2 == 0) {
-    row.append(input);
-    $(".intensity").append(row);
-  } else {
-    $(".intensity .row:last-child").append(input);
+  listedAlgos.sort();
+  $(".intensity").html("");
+  if (intensities === undefined) {
+    intensities = {};
   }
+  for(var i = 0; i < listedAlgos.length; i++) {
+    var algo = listedAlgos[i];
+    var row = $(`<div class="row">`);
+    if(intensities[algo] === undefined) {
+      intensities[algo] = "";
+    }
+    var val = intensities[algo];
+    var input = `<div class="col-xs-6"><div class="input-group input-group-xs">
+                  <span class="input-group-addon" id="basic-addon1">${algo}</span>
+                  <input type="text" id="${algo}" class="intensity_val form-control" aria-describedby="basic-addon1" value="${val}">
+                </div></div>`;
+    if(i % 2 == 0) {
+      row.append(input);
+      $(".intensity").append(row);
+    } else {
+      $(".intensity .row:last-child").append(input);
+    }
+  }
+  store.set("intensities", intensities);
 }
 
 // Intro section
 if(store.get("intro") == false) {
   $("#back").hide();
-  $("#advanced").hide();
 } else{
   $("#next").hide();
 }

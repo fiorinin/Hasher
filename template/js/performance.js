@@ -11,6 +11,7 @@ var fs   = require('fs');
 var spawn = require('child_process').spawn;
 const async = require('async');
 const MiningUtils = require("../../controls/miningutils.js");
+const Utils = require("../../controls/utilities.js");
 const mutils = new MiningUtils();
 var cancelBenchmark = false;
 var fse = require('fs-extra');
@@ -327,8 +328,6 @@ function DLComplete(i,miner) {
 }
 
 // Benchmark setup happens here...
-var average = arr => arr.reduce( ( p, c ) => p + c, 0 ) / arr.length;
-function isNumber(n) { return !isNaN(parseFloat(n)) && !isNaN(n - 0) }
 function benchmark() {
   bar.currentValue = 0;
   bar.animate(bar.currentValue);
@@ -399,25 +398,21 @@ function benchmark() {
       var hashes = [];
       var m = spawn(...cmd);
       m.stdout.on('data', (data) => {
-        hash = mutils.getHashrate(cmd[0], new TextDecoder("utf-8").decode(data));
-        if (config.debug == true) {
-          console.log(hash);
-        }
-        if(isNumber(hash)) {
+        var hash = mutils.process(cmd[0], data);
+        if(hash !== undefined) {
           hashes.push(hash);
         }
       });
-
       m.stderr.on('data', (data) => {
-        err = new TextDecoder("utf-8").decode(data);
-        if (config.debug == true) {
-          console.log(err);
+        var hash = mutils.process(cmd[0], data);
+        if(hash !== undefined) {
+          hashes.push(hash);
         }
       });
 
       // When job is closed (end of this bench)
       m.on('close', (code) => {
-        var avgH = average(hashes);
+        var avgH = Utils.average(hashes);
         if(config.debug) {
           console.log(`logged: ${avgH}`);
         }

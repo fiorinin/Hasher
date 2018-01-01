@@ -1,5 +1,6 @@
 const Store = require('electron-store');
 const store = new Store();
+const utilities = require("./utilities.js");
 var config = store.get("config");
 var retry = require('requestretry');
 var request = require("request");
@@ -44,12 +45,25 @@ module.exports = class MiningUtils {
   parseCcminer(string) {
     var sp = string.split(",");
     var h = sp[sp.length-1];
-    if(h.includes("/s")) {
+    if(h.includes("/s") && !string.includes("GPU ")) {
       h = h.trim();
-      var val_unit = h.match(/[a-z]+|[^a-z]+/gi);
+      var val_unit = h.match(/[a-z]+\s?|[^a-z]+/gi);
       return this.uniform(val_unit[0], val_unit[1].toLowerCase());
     }
-    return "not a hash: \n"+string;
+    return string;
+  }
+
+  process(cmd, data) {
+    var message = new TextDecoder("utf-8").decode(data);
+    var hash = this.getHashrate(cmd, message);
+    if (config.debug == true) {
+      console.log(message);
+    }
+    if(utilities.isNumber(hash)) {
+      console.log("^ is a hash.");
+      return hash;
+    }
+    console.log(`^ is NOT a hash`);
   }
 
   __retryStrategy(err, response, body) {
