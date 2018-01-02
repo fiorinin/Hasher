@@ -22,14 +22,13 @@ body {
   height: 20px;
   line-height:20px;
   background-color: #dfdce3;
-  font-family: "rawline", sans-serif;
 }
 
 #version {
   margin-right: 10px;
   color: #333333;
-  font-weight: 100;
   font-size: 12px;
+  font-family: "rawline", sans-serif;
 }
 
 .btn {
