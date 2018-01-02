@@ -4,17 +4,7 @@ const utilities = require("./utilities.js");
 var config = store.get("config");
 var retry = require('requestretry');
 var request = require("request");
-
-const success = [
- 'background: #4abdac',
- 'color: white',
- 'display: block',
-].join(';');
-const failure = [
- 'background: #f7b733',
- 'color: white',
- 'display: block',
-].join(';');
+const log = require('electron-log');
 
 module.exports = class MiningUtils {
   constructor() {}
@@ -69,11 +59,11 @@ module.exports = class MiningUtils {
     var hash = this.getHashrate(cmd, message);
     if(utilities.isNumber(hash)) {
       if(config.debug === true)
-        console.log(`%c ${message}`, success);
+        log.verbose(`\x1B[0;30;42m${message.trim()}`);
       return hash;
     }
     if(config.debug === true)
-      console.log(`%c ${message}`, failure);
+      log.verbose(`\x1B[0;37;44m${message.trim()}`);
   }
 
   __retryStrategy(err, response, body) {

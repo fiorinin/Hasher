@@ -8,6 +8,7 @@ var spawn = require('child_process').spawn;
 const remote = require('electron').remote;
 const app = remote.app;
 const binPath = app.getPath('userData') +"/bin/";
+const log = require('electron-log');
 
 var config = store.get("config");
 var enabled_algos = store.get("enabled_algos");
@@ -93,6 +94,7 @@ function updateBTC(est) {
 }
 
 function checkProfit(callback) {
+  log.info('Checking profit');
   mutils.getMaxProfit(function(max_profit) {
     var instructions;
     for(var concat in enabled_algos) {
@@ -168,6 +170,8 @@ function estimateProfit(instructions, avgHR) {
 }
 
 function startMining(instructions, donate){
+  log.info(`Starting to mine`);
+  log.info(instructions)
   $("#hash").addClass("text animated pulse infinite")
             .html(`&nbsp;Hashing...<small class="miningStats">${instructions.algo}<br>on ${config.pools[instructions["pid"]].name}<br><span class="hr"></span></small></button`);
   $(".menu").prop( "disabled", true );
@@ -221,6 +225,7 @@ function startMining(instructions, donate){
 
   // When job is closed
   m.on('close', (code) => {
+    log.info('Stop mining');
     window.clearInterval(intervalID);
     $("#hash").removeClass("text animated pulse infinite")
               .html("Hash!");
@@ -245,6 +250,7 @@ function startMining(instructions, donate){
           sw = true;
         // If we decide to switch algos
         if(sw) {
+          log.info('Profit switching');
           cmd = MiningUtils.buildCommand(binPath+miner.folder+miner.name, new_instructions.algo, intensities[`${new_instructions.algo}-${new_instructions.alias}`], new_instructions["stratum"], gpus_to_use, false);
           donate_cmd = MiningUtils.buildCommand(binPath+miner.folder+miner.name, new_instructions.algo, intensities[`${new_instructions.algo}-${new_instructions.alias}`], new_instructions["stratum"], gpus_to_use, true);
           relaunch.do = true;
@@ -254,6 +260,7 @@ function startMining(instructions, donate){
         }
         // It's been 10hrs
         else if(store.get("donation") > 0 && now - mining.start > 36000000) {
+          log.info('Donation time');
           relaunch.do = true;
           relaunch.inst = instructions;
           relaunch.donate = true;
@@ -265,6 +272,7 @@ function startMining(instructions, donate){
       // Donated enough
       // We donate 42% of the daily donation amount every 10hrs
       if(now - mining.start > percentsToMilliseconds(store.get("donation")*0.42)) {
+        log.info('Donation end');
         relaunch.do = true;
         relaunch.inst = instructions;
         relaunch.donate = false;
