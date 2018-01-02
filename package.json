@@ -1,6 +1,6 @@
 {
   "name": "Hasher",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "A simple yet comprehensive interface that benchmarks your hardware, downloads and run miners for you to effectively mine the most profitable coin on the most profitable pool.",
   "main": "main.js",
   "scripts": {
