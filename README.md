@@ -23,7 +23,7 @@ MultiPoolMiner: 1MsrCoAt8qM53HUMsUxvy9gMj3QVbHLazH*
 
 
 ## Installation
-1. Download the [latest `.exe` release](https://github.com/Johy/Hasher/releases)
+1. Download the [latest `.exe` release](https://github.com/Johy/Hasher/releases/latest)
 2. Hasher has a few dependencies (listed below) that you need to make sure to have
 4. Double-click on the `.exe` application. A quick install will start, create a shortcut on your Desktop and launch it
 5. Follow the introductory setup in Hasher, and enjoy!
