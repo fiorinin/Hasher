@@ -1,16 +1,22 @@
 var config = require("./config");
-var electron = require('electron');
-const app = electron.app;
-const BrowserWindow = electron.BrowserWindow;
+const {app, BrowserWindow, ipcMain} = require('electron');
+const {autoUpdater} = require("electron-updater");
 const path = require('path')
 const url = require('url')
 const Store = require('electron-store');
 const store = new Store();
 const GPU = require("./controls/gpu.js");
 const gpu = new GPU();
+const log = require('electron-log');
 
-let mainWindow
+let mainWindow;
 require('electron-debug')({showDevTools: config.debug});
+
+if(config.debug == true) {
+  autoUpdater.logger = log;
+  autoUpdater.logger.transports.file.level = 'info';
+  log.info('App starting...');
+}
 
 // GUI ///////
 function createWindow () {
@@ -27,18 +33,11 @@ function createWindow () {
     slashes: true
   }))
 
-  // ipc example
-  // mainWindow.webContents.on('did-finish-load', () => {
-  //   mainWindow.webContents.send('version', pjson.version);
-  // })
-
-  const {ipcMain} = require('electron')
   ipcMain.on('changePage', (event, arg) => {
     loadPage(arg)
   })
 
   mainWindow.on('closed', function () {
-    // TODO: kill mining child process
     mainWindow = null
   })
 }
@@ -104,7 +103,10 @@ store.set("config", config);
 ////////////
 
 // App /////
-app.on('ready', createWindow)
+app.on('ready', function(){
+  autoUpdater.checkForUpdatesAndNotify();
+  createWindow();
+});
 
 app.on('window-all-closed', function () {
   if (process.platform !== 'darwin') {

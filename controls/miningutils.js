@@ -5,6 +5,17 @@ var config = store.get("config");
 var retry = require('requestretry');
 var request = require("request");
 
+const success = [
+ 'background: #4abdac',
+ 'color: white',
+ 'display: block',
+].join(';');
+const failure = [
+ 'background: #f7b733',
+ 'color: white',
+ 'display: block',
+].join(';');
+
 module.exports = class MiningUtils {
   constructor() {}
 
@@ -45,7 +56,7 @@ module.exports = class MiningUtils {
   parseCcminer(string) {
     var sp = string.split(",");
     var h = sp[sp.length-1];
-    if(h.includes("/s") && !string.includes("GPU ")) {
+    if(h.includes("/s") && !string.includes("GPU")) {
       h = h.trim();
       var val_unit = h.match(/[a-z]+\s?|[^a-z]+/gi);
       return this.uniform(val_unit[0], val_unit[1].toLowerCase());
@@ -56,14 +67,13 @@ module.exports = class MiningUtils {
   process(cmd, data) {
     var message = new TextDecoder("utf-8").decode(data);
     var hash = this.getHashrate(cmd, message);
-    if (config.debug == true) {
-      console.log(message);
-    }
     if(utilities.isNumber(hash)) {
-      console.log("^ is a hash.");
+      if(config.debug === true)
+        console.log(`%c ${message}`, success);
       return hash;
     }
-    console.log(`^ is NOT a hash`);
+    if(config.debug === true)
+      console.log(`%c ${message}`, failure);
   }
 
   __retryStrategy(err, response, body) {

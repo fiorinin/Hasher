@@ -38,7 +38,7 @@ MultiPoolMiner: 1MsrCoAt8qM53HUMsUxvy9gMj3QVbHLazH*
 
 ## Known issues
 * Hasher is still extremely recent, so do not expect complete stability over 1 month without rebooting, for example (although it might just work!). Bugs are to be expected but at this point, I need actual users to report them so that I can fix them. Note that Hasher does nothing else than running miners. It's not overclocking your hardware or anything.
-* Following on this, I am not an AMD user, therefore I can't test anything related to AMD cards. I'd be very happy if some people reported their experience with AMD but in the meantime, consider AMD will be less stable. And CPU is not implemented either but it might integrate it if there's demand.
+* Following on this, I am not an AMD user, therefore **I can't test anything related to AMD cards and AMD miners have not be tested**. I'd be very happy if some people reported their experience with AMD but in the meantime, consider AMD will be less stable. And CPU is not implemented either but it might integrate it if there's demand.
 * I am working on a logging system so that users can better share their issues if any. This will help me to be more responsive to fix these issues.
 
 ## Frequently Asked Questions

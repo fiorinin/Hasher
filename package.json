@@ -1,18 +1,20 @@
 {
   "name": "Hasher",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "A simple yet comprehensive interface that benchmarks your hardware, downloads and run miners for you to effectively mine the most profitable coin on the most profitable pool.",
   "main": "main.js",
   "scripts": {
     "postinstall": "install-app-deps",
     "start": "electron .",
     "pack": "electron-builder --dir",
-    "dist": "electron-builder"
+    "dist": "electron-builder",
+    "publish": "build -p always"
   },
   "build": {
-    "appId": "Hasher",
+    "appId": "com.github.johy.hasher",
     "win": {
-      "icon": "./build/hasher_icon"
+      "icon": "./build/hasher_icon",
+      "publish": ["github"]
     }
   },
   "repository": "https://github.com/Johy/Hasher",
@@ -37,7 +39,9 @@
     "async": "^2.6.0",
     "bootstrap": "^3.3.7",
     "electron-debug": "^1.4.0",
+    "electron-log": "^2.2.13",
     "electron-store": "^1.3.0",
+    "electron-updater": "^2.18.0",
     "fs-extra": "^5.0.0",
     "https": "^1.0.0",
     "jquery": "^3.2.1",
