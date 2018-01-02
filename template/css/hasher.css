@@ -22,6 +22,7 @@ body {
   height: 20px;
   line-height:20px;
   background-color: #dfdce3;
+  font-family: "rawline", sans-serif;
 }
 
 #version {
@@ -120,7 +121,7 @@ a.list-group-item.active, a.list-group-item.active:hover, a.list-group-item.acti
   left:0;
   position: fixed;
   width: 600px;
-  height: 434px;
+  height: 444px;
   background-color: #ffffff;
   z-index:10;
   overflow: auto;

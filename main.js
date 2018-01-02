@@ -99,6 +99,10 @@ if (typeof store.get('langPools') === 'undefined') {
   }
   store.set("langPools", langPools);
 }
+// Force Nvidia for now
+if (typeof store.get('hardware') === 'undefined') {
+  store.set("hardware", "nvidia");
+}
 store.set("config", config);
 ////////////
 

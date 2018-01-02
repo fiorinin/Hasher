@@ -78,7 +78,7 @@ module.exports = class MiningUtils {
 
   __retryStrategy(err, response, body) {
     if(err !== undefined || body.length == 2) {
-      $("#error").text("Error in contacting pool. Retrying...");
+      // $("#error").text("Error in contacting pool. Retrying...");
       return true;
     }
   }

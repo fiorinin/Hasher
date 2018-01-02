@@ -1,6 +1,6 @@
 var config = {}
 
-config.debug = true;
+config.debug = false;
 
 // Given how frequently pools fail, we need at least some caching...
 config.cache = {
@@ -111,6 +111,14 @@ config.miners = [
     "folder": "ccminerXevan/",
     "algos": ["xevan"]
   }
+  // {
+  //   "name": "sgminer",
+  //   "alias": "sgminer",
+  //   "hardware": "amd",
+  //   "URL": "https://github.com/nicehash/sgminer/releases/download/5.6.1/sgminer-5.6.1-nicehash-51-windows-amd64.zip",
+  //   "folder": "sgminer-nicehash/",
+  //   "algos": ["xevan"]
+  // }
 ]
 
 // Supported pools
