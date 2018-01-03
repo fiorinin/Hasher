@@ -15,6 +15,7 @@ const Utils = require("../../controls/utilities.js");
 const mutils = new MiningUtils();
 var cancelBenchmark = false;
 var fse = require('fs-extra');
+const log = require('electron-log');
 
 // Some global settings
 var config = store.get("config");
@@ -249,19 +250,17 @@ $(document.body).on('click', '.dropdown-menu li a', function(){
 });
 
 // Click on benchmark: DL miners first and verify requirements
-var doneMiner;
+var increment = 1/miners.length;
+var promises = [];
 $("#benchmark").click(function() {
   if ($(this).hasClass("disabled")) {
     return false;
   }
   $(".loadpopup").removeClass("hidden");
-  doneMiner = 0;
 
   // First, check miners are here and if not, download
   $("#action").text("Downloading miners...");
-  var increment = 1/miners.length;
   var barval = 0;
-  var promises = [];
   for(var idx in miners) {
     var miner = miners[idx];
     // Only eligible miners
@@ -270,65 +269,101 @@ $("#benchmark").click(function() {
     }
     // Check if we have a bin directory
     if (!fs.existsSync(binPath)) {
+      log.info("Creating bin directory");
       fs.mkdirSync(binPath);
     }
     if (!fs.existsSync(binPath+miner.folder+miner.name+".exe")) {
       if (!fs.existsSync(binPath+miner.folder)) {
+        log.info(`${miner.folder+miner.name} missing, creating folder.`)
         fs.mkdirSync(binPath+miner.folder);
       }
-      fetchAndUnzip(miner,increment);
+      promises.push(miner)
     } else {
+      log.info(`${miner.folder+miner.name} already downloaded and ready to use.`)
       bar.currentValue += increment;
       bar.animate(bar.currentValue);
-      doneMiner += 1;
-      if(doneMiner == miners.length) {
-        benchmark();
-      }
     }
   }
+  // Fetch and unzip needed miners one by one
+  async.eachSeries(promises, function(miner) {
+    fetchAndUnzip(miner, function(validate) {
+      DLComplete(validate, miner, function() {
+        log.info(`Done with miner ${miner.folder+miner.name}`)
+      });
+    });
+  }, function() {
+    benchmark();
+  });
 })
 
 // Fetch and unzip a file
-function fetchAndUnzip(miner,increment) {
+function fetchAndUnzip(miner, callback) {
   var splitURL = miner.URL.split("/");
   var zipfile = splitURL[splitURL.length-1];
   var path = binPath+miner.folder;
+  log.info(`Downloading ${miner.folder+miner.name}.`)
   request(miner.URL)
   .pipe(fs.createWriteStream(path+zipfile))
   .on('close', function () {
+    log.info(`${miner.folder+miner.name} downloaded.`)
     bar.currentValue += increment*0.8;
     var validate = increment*0.2;
     bar.animate(bar.currentValue);
+    // .zip
     if(zipfile.includes(".zip")){
+      log.info(`Unzipping ${miner.folder+miner.name}.`)
       var zip = new AdmZip(path+zipfile);
-      zip.extractAllTo(path, true);
-      DLComplete(validate,miner);
-    } else if(zipfile.includes(".7z")) {
+      try {
+        zip.extractAllTo(path, true);
+        log.info(`${miner.folder+miner.name} unzipped.`)
+      } catch(e) {
+        log.error(`Error when unzipping: ${e}`)
+      }
+      callback(validate);
+    }
+    // .7z
+    else if(zipfile.includes(".7z")) {
+      log.info(`Unzipping (7z) ${miner.folder+miner.name}.`)
       var task = spawn(_7z, ['x', path+zipfile, '-o'+path, '-y']);
       task.on('close', (code) => {
-        DLComplete(validate,miner);
+        log.info(`${miner.folder+miner.name} unzipped (7z).`)
+        callback(validate);
       });
-    } else {
-      DLComplete(validate,miner);
+      task.on('error', function(err) {
+        log.error(`Error when unzipping: ${err}`)
+      });
+    }
+    // No zip
+    else {
+      log.info(`${miner.folder+miner.name} already unzipped.`)
+      callback(validate);
     }
   });
 }
 
-function DLComplete(i,miner) {
+function DLComplete(i, miner, callback) {
   // Folderception
   if(miner.zipdir !== undefined) {
-    fse.move(binPath+miner.folder+miner.zipdir, binPath+miner.folder, console.error);
+    // Async move everything in parent folder
+    fse.move(binPath+miner.folder+miner.zipdir, binPath+miner.folder)
+    .then(() => {
+      bar.currentValue += i;
+      bar.animate(bar.currentValue)
+      callback();
+    })
+    .catch(err => {
+      log.error(`Error when moving files: ${err}`)
+    })
   }
+  // Nothing to move
   bar.currentValue += i;
   bar.animate(bar.currentValue);
-  doneMiner += 1;
-  if(doneMiner == miners.length) {
-    benchmark();
-  }
+  callback();
 }
 
 // Benchmark setup happens here...
 function benchmark() {
+  log.info("Starting benchmark");
   bar.currentValue = 0;
   bar.animate(bar.currentValue);
   $("#action").text("Loading pool data...");
