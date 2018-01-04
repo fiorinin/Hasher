@@ -114,7 +114,8 @@ function checkProfit(callback) {
             coin_unit = pool.coin_unit[algo];
           }
           profit = hr / coin_unit * mp[estimate] * pool.profit_multiplier;
-          if(instructions === undefined || profit > instructions.profit) {
+          // For switching we need more than 5% better profit
+          if(instructions === undefined || profit > instructions.profit) { // Should smooth a bit here
             instructions = mp;
             instructions.alias = miner_alias;
             instructions.algo = algo;
@@ -233,6 +234,9 @@ function startMining(instructions, donate){
     $("#est_cur").html(``);
     $(".menu").prop( "disabled", false );
     if(relaunch.do == true) {
+      if(relaunch.reset) {
+        mining = {}; // Resets the timer
+      }
       startMining(relaunch.inst, relaunch.donate);
     }
   });
@@ -256,6 +260,7 @@ function startMining(instructions, donate){
           relaunch.do = true;
           relaunch.inst = new_instructions;
           relaunch.donate = false;
+          relaunch.reset = false;
           mining.process.kill();
         }
         // It's been 10hrs
@@ -264,7 +269,7 @@ function startMining(instructions, donate){
           relaunch.do = true;
           relaunch.inst = instructions;
           relaunch.donate = true;
-          mining = {}; // Resets the timer so we can know donation time
+          relaunch.reset = true;
           mining.process.kill();
         }
       });
@@ -276,7 +281,7 @@ function startMining(instructions, donate){
         relaunch.do = true;
         relaunch.inst = instructions;
         relaunch.donate = false;
-        mining = {}; // Resets the timer for another 10hrs
+        relaunch.reset = true;
         mining.process.kill();
       }
     }

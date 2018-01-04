@@ -285,12 +285,13 @@ $("#benchmark").click(function() {
     }
   }
   // Fetch and unzip needed miners one by one
-  async.eachSeries(promises, function(miner) {
+  async.eachSeries(promises, function(miner, callback) {
     fetchAndUnzip(miner, function(validate) {
       DLComplete(validate, miner, function() {
         log.info(`Done with miner ${miner.folder+miner.name}`)
-      });
-    });
+        callback(null);
+      })
+    })
   }, function() {
     benchmark();
   });
@@ -315,10 +316,10 @@ function fetchAndUnzip(miner, callback) {
       var zip = new AdmZip(path+zipfile);
       try {
         zip.extractAllTo(path, true);
-        log.info(`${miner.folder+miner.name} unzipped.`)
       } catch(e) {
         log.error(`Error when unzipping: ${e}`)
       }
+      log.info(`${miner.folder+miner.name} unzipped.`)
       callback(validate);
     }
     // .7z
@@ -350,15 +351,13 @@ function DLComplete(i, miner, callback) {
       bar.currentValue += i;
       bar.animate(bar.currentValue)
       callback();
-    })
-    .catch(err => {
-      log.error(`Error when moving files: ${err}`)
-    })
+    });
+  } else {
+    // Nothing to move
+    bar.currentValue += i;
+    bar.animate(bar.currentValue);
+    callback();
   }
-  // Nothing to move
-  bar.currentValue += i;
-  bar.animate(bar.currentValue);
-  callback();
 }
 
 // Benchmark setup happens here...
