@@ -63,19 +63,22 @@ This depends heavily on you, actually. Benchmarking is simple: Hasher runs algor
 The balance displayed is **shared across all selected pools**. If you are using a single pool and the value is different, there is likely a network error (check for the warning symbol in the balance box) and Hasher could not update this value. The pool website will always display the correct value.
 
 ###### How is the profit estimated?
-For each algorithm-miner pair you have benchmarked, Hasher will search eligible pools among those you have selected. It will compare their potential profit by using their API, and using the `actual_last24h` field. This has proven to be the most reliable estimate, but I do plan to allow users to switch it to `current_estimate` or `estimate_last24h`. Then, Hasher selects the algorithm-miner pair that would yield the maximum profit given the pool estimates.
+For each algorithm-miner pair you have benchmarked, Hasher will search eligible pools among those you have selected. It will compare their potential profit by using their API, and using the `actual_last24h` field. In my experiments, it was the most reliable estimate, but you can change it to `estimate_current` or `estimate_last24h` in the advanced settings. Then, Hasher selects the algorithm-miner pair that would yield the maximum profit given the pool estimates.
 
 ###### How is the hashrate calculated?
-The hashrate is always the one provided by the miner. In `Performance` section, it is the average hashrate for the benchmark period (see above). When you mine, it is the average of the last 5 values reported by the miner.
+The hashrate is always the one provided by the miner. In the `Performance` section, it is the average hashrate for the benchmark period (see above). When you mine, it is the average of the last 5 values reported by the miner.
 
 ###### How frequently does Hasher check profit?
-By default, every 10mins, but I am planning to add a setting for this so you can pick any value within an interval.
+By default, every 10mins, but you can change it in the advanced settings and set it between 10mins and 1 day (1,440mins).
+
+###### What is the smoothing parameter?
+It helps not switching algorithms/pools for no reason. When it's set to 0 and another algorithm/pool has a better estimated profit, Hasher will simply switch to it. This  can lead to constantly jumping among algorithms and pools because their calculated profit is close. This behavior is known to prevent building enough speed for mining effectively. With the smoothing parameter at 5, for example, Hasher will switch only if the new algorithm/pool is at least 5% more profitable than the current setup. Mining is more stable but you won't miss out on actually more profitable algorithms or pools.
 
 ###### What about donations?
 By default, 1% of your mining is donated to support Hasher. This represents 14mins of a full day of mining. Donation occurs every 10 hours of mining (i.e. 6mins every 10hrs by default), so you can benchmark, test the app and play around freely. You can increase it (\~wow much love\~), or set it to 0. You can also directly donate at this address: **14t4EkREaQfsbwngtLS7KJx7d1ADiWuB9c**. Donations really help this project, so thank you!
 
 ###### Where are Hasher's files stored?
-Apart from the executable you download, Hasher uses the following path to download miners, store your settings, caches, etc.: ```C:\Users\<USER>\AppData\Roaming\Hasher```. Feel free to have a look and delete it if you plan not to use Hasher anymore. Note that removing this folder will delete all your settings and you will have to go through the introduction again and benchmark your hardware if you want to use Hasher again.
+Apart from the executable you download, Hasher uses the following path to download miners, store your settings, caches, etc.: ```C:\Users\<USER>\AppData\Roaming\Hasher```. Feel free to have a look and delete it if you plan not to use Hasher anymore. Note that removing this folder will delete all your settings and you will have to go through the introduction and benchmark your hardware if you want to use Hasher again.
 
 ###### I want to contribute!
 Amazing, thank you really! You are welcome to browse, download and improve the code as you wish. It's still messy so far but as soon as I get all the features I want, I'll clean it up deeply. To run the code, you should have [Node.js](https://nodejs.org), then download the latest release, uncompress it and run:
