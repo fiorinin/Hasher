@@ -447,9 +447,7 @@ function benchmark() {
       // When job is closed (end of this bench)
       m.on('close', (code) => {
         var avgH = Utils.average(hashes);
-        if(config.debug) {
-          console.log(`logged: ${avgH}`);
-        }
+        log.info(`logged: ${avgH} for ${algo}`);
         // If new bench or bench was with other GPU set, reset
         if(benched.gpus === undefined || benched.gpus != gid) {
           benched = {};

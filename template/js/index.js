@@ -16,6 +16,8 @@ var benched = store.get("benched");
 var gpus_to_use = store.get("gpus_to_use");
 var intensities = store.get("intensities");
 var estimate = store.get("estimate");
+var profitCheckFreq = store.get("profitCheckFreq");
+var smoothing = store.get("smoothing");
 var miners = config.miners;
 var mining = {};
 var cmd;
@@ -114,8 +116,8 @@ function checkProfit(callback) {
             coin_unit = pool.coin_unit[algo];
           }
           profit = hr / coin_unit * mp[estimate] * pool.profit_multiplier;
-          // For switching we need more than 5% better profit
-          if(instructions === undefined || profit > instructions.profit) { // Should smooth a bit here
+          // For switching we need more profit
+          if(instructions === undefined || profit > instructions.profit) {
             instructions = mp;
             instructions.alias = miner_alias;
             instructions.algo = algo;
@@ -176,10 +178,10 @@ function startMining(instructions, donate){
   $("#hash").addClass("text animated pulse infinite")
             .html(`&nbsp;Hashing...<small class="miningStats">${instructions.algo}<br>on ${config.pools[instructions["pid"]].name}<br><span class="hr"></span></small></button`);
   $(".menu").prop( "disabled", true );
-  var checkInterval = 600000;
+  var checkInterval = profitCheckFreq * 60000;
   var run = cmd;
   if(donate) {
-    checkInterval = 60000;
+    checkInterval = 60000; // check every minute if donation should stop
     run = donate_cmd;
     $("#whatsitdoing").text("♥ Donating ♥");
   } else {
@@ -249,8 +251,8 @@ function startMining(instructions, donate){
       refreshBalance();
       checkProfit(function(new_instructions, miner) {
         var sw = false;
-        // Does it suggest a different algo/pool?
-        if(new_instructions !== undefined && (new_instructions.algo != instructions.algo || new_instructions["pid"] != instructions["pid"]))
+        // Does it suggest a different algo/pool? And is it at least smoothing% better than current?
+        if(new_instructions !== undefined && new_instructions.profit > instructions.profit*(1+smoothing/100) && (new_instructions.algo != instructions.algo || new_instructions["pid"] != instructions["pid"]))
           sw = true;
         // If we decide to switch algos
         if(sw) {
@@ -271,6 +273,10 @@ function startMining(instructions, donate){
           relaunch.donate = true;
           relaunch.reset = true;
           mining.process.kill();
+        }
+        // We don't switch nor donate, so update current profit for future tests
+        else {
+          instructions.profit = new_instructions.profit;
         }
       });
     } else {

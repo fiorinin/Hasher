@@ -12,11 +12,12 @@ const log = require('electron-log');
 let mainWindow;
 require('electron-debug')({showDevTools: config.debug});
 
-if(config.debug == true) {
+if(config.debug) {
   autoUpdater.logger = log;
   autoUpdater.logger.transports.file.level = 'info';
-  log.info('App starting...');
 }
+
+log.info('App starting...');
 
 // GUI ///////
 function createWindow () {
@@ -84,6 +85,12 @@ if (typeof store.get('enabled_algos') === 'undefined') {
 }
 if (typeof store.get('estimate') === 'undefined') {
   store.set("estimate", "24h_actual");
+}
+if (typeof store.get('profitCheckFreq') === 'undefined') {
+  store.set("profitCheckFreq", 10);
+}
+if (typeof store.get('smoothing') === 'undefined') {
+  store.set("smoothing", 5);
 }
 if (typeof store.get('langPools') === 'undefined') {
   var langPools = [];

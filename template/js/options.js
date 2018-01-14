@@ -1,10 +1,14 @@
 const Store = require('electron-store');
 const store = new Store();
+const utilities = require("../../controls/utilities.js");
 var WAValidator = require('wallet-address-validator');
 var config = store.get("config");
 
 var miners = config.miners;
 var intensities = store.get("intensities");
+var estimate = store.get('estimate');
+var profitCheckFreq = store.get("profitCheckFreq");
+var smoothing = store.get("smoothing");
 
 wal = store.get("wallet");
 if (wal !== undefined) {
@@ -147,6 +151,52 @@ function reloadAlgos() {
   }
   store.set("intensities", intensities);
 }
+
+$(`#${estimate}`).prop("checked", true);
+$(".pestimate input").change(function() {
+  estimate = $(this).attr("id");
+  store.set("estimate", estimate);
+});
+
+$(`#check_frequency`).val(profitCheckFreq);
+$("#check_frequency").keyup(function() {
+  var val = parseInt($(this).val());
+  if(!utilities.isNumber(val)) {
+    $("#check_frequencyErr").html("You need to enter a number.");
+    $("#check_frequencyErr").show();
+  } else if(val < 10) {
+    $("#check_frequencyErr").html("The minimum value is every 10mins.");
+    $("#check_frequencyErr").show();
+  } else if(val > 1440) {
+    $("#check_frequencyErr").html("The maximum value is every 1440mins (once a day).");
+    $("#check_frequencyErr").show();
+  } else {
+    $("#check_frequencyErr").hide();
+    profitCheckFreq = val;
+    store.set("profitCheckFreq", profitCheckFreq);
+  }
+})
+
+$(`#smoothing`).val(smoothing);
+$("#smoothing").keyup(function() {
+  var val = parseInt($(this).val());
+  if(!utilities.isNumber(val)) {
+    $("#smoothingErr").html("You need to enter a number.");
+    $("#smoothingErr").show();
+  } else if(val < 0) {
+    $("#smoothingErr").html("This value cannot be negative.");
+    $("#smoothingErr").show();
+  } else if(val > 20) {
+    $("#smoothingErr").html("This value cannot be higher than 20%.");
+    $("#smoothingErr").show();
+  } else {
+    $("#smoothingErr").hide();
+    smoothing = val;
+    store.set("smoothing", smoothing);
+  }
+});
+
+$(".errors").hide();
 
 // Intro section
 if(store.get("intro") == false) {

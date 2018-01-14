@@ -108,10 +108,10 @@ module.exports = class MiningUtils {
             var port = obj["port"];
             if(algosInPools[algo] === undefined && unique) {
               // Add this item to the list to benchmark potentially
-              algosInPools[algo] = {"stratum": MiningUtils.buildStratum(pool.mine_URL, algo, port, pid, region), "current_estimate": obj["current_estimate"], "24h_estimated": obj["24h_estimated"], "24h_actual": obj["24h_actual"]};
+              algosInPools[algo] = {"stratum": MiningUtils.buildStratum(pool.mine_URL, algo, port, pid, region), "estimate_current": obj["estimate_current"]*1000, "estimate_last24h": obj["estimate_last24h"]*1000, "24h_actual": obj["24h_actual"]};
             } else if(!unique) {
               // Add this item to the full list of algos per pool
-              algosInPools[pid][algo] = {"stratum": MiningUtils.buildStratum(pool.mine_URL, algo, port, pid, region), "current_estimate": obj["current_estimate"], "24h_estimated": obj["24h_estimated"], "24h_actual": obj["24h_actual"]};
+              algosInPools[pid][algo] = {"stratum": MiningUtils.buildStratum(pool.mine_URL, algo, port, pid, region), "estimate_current": obj["estimate_current"]*1000, "estimate_last24h": obj["estimate_last24h"]*1000, "24h_actual": obj["24h_actual"]};
             }
           });
         }
@@ -173,9 +173,9 @@ module.exports = class MiningUtils {
                 var algo = tds[0].querySelector("b").innerHTML;
                 var port = tds[1].innerHTML;
                 if(pid == 0 || pid == 2) {
-                  algosInPool.push({"algo": algo, "port": port, "current_estimate": tds[6].innerHTML.replace(/[^\d.-]/g, ''), "24h_estimated": tds[7].innerHTML.replace(/[^\d.-]/g, ''), "24h_actual": tds[8].innerHTML.replace(/[^\d.-]/g, '')});
+                  algosInPool.push({"algo": algo, "port": port, "estimate_current": tds[6].innerHTML.replace(/[^\d.-]/g, ''), "estimate_last24h": tds[7].innerHTML.replace(/[^\d.-]/g, ''), "24h_actual": tds[8].innerHTML.replace(/[^\d.-]/g, '')});
                 } else if(pid == 1){
-                  algosInPool.push({"algo": algo, "port": port, "current_estimate": tds[7].innerHTML, "24h_estimated": tds[8].innerHTML, "24h_actual": tds[9].innerHTML});
+                  algosInPool.push({"algo": algo, "port": port, "estimate_current": tds[7].innerHTML, "estimate_last24h": tds[8].innerHTML, "24h_actual": tds[9].innerHTML});
                 }
               }
               callback(null, algosInPool);
@@ -191,7 +191,7 @@ module.exports = class MiningUtils {
           }
           // Let's parse that
           for (const [key, value] of Object.entries(body)) {
-            algosInPool.push({"algo": key, "port": value.port, "current_estimate": value.estimate_current, "24h_estimated": value.estimate_last24h, "24h_actual": value.actual_last24h});
+            algosInPool.push({"algo": key, "port": value.port, "estimate_current": value.estimate_current, "estimate_last24h": value.estimate_last24h, "24h_actual": value.actual_last24h});
           }
           callback(null, algosInPool);
         }
@@ -207,7 +207,7 @@ module.exports = class MiningUtils {
         for (var idx in results) {
           var obj = results[idx];
           // Only one estimate in NiceHash, so I map it to the default estimate
-          algosInPool.push({"algo": obj["name"], "port": obj["port"], "current_estimate": 0, "24h_estimated": 0, "24h_actual": obj["paying"]});
+          algosInPool.push({"algo": obj["name"], "port": obj["port"], "estimate_current": 0, "estimate_last24h": 0, "24h_actual": obj["paying"]});
         }
         callback(null, algosInPool);
       }

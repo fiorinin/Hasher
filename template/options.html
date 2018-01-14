@@ -86,7 +86,8 @@
 
       <div class="row top-buffer">
         <div class="col-xs-12 text-right">
-          <div class="btn btn-default" id="advanced">Advanced</button></div>
+          <div class="btn btn-default" id="advanced">Advanced</button>
+          </div>
         </div>
       </div>
 
@@ -98,12 +99,71 @@
             </div>
             <div class="col-xs-12">
               <h4>Advanced settings</h4>
-              <p>Here, you can customize intensity for each algorithm-miner pair. More options will be available as Hasher is updated. Use a single value to apply the same intensity to all your GPUs (e.g., <code>17.5</code>), or multiple values separated with a comma. For instance, <code>17.5,14</code> means GPU #0 will be affected <code>17.5</code> and GPU #1 <code>14</code>.<br>
-              <small class="text-alert">If you experience crashes, shutdowns or if benchmark does not succeed for some algorithms (i.e. you obtain 0H/s), you may try to reduce their intensity.</small></p>
-              <form class="form-inline intensity"></form>
+              <ul class="nav nav-tabs" role="tablist">
+                <li class="nav-item active">
+                  <a class="nav-link" data-toggle="tab" href="#intensitycollapse" role="tab">Mining intensities</a>
+                </li>
+                <li class="nav-item">
+                  <a class="nav-link" data-toggle="tab" href="#profitcollapse" role="tab">Profit switching</a>
+                </li>
+              </ul>
+              <div class="tab-content">
+                <div class="tab-pane active top-buffer" id="intensitycollapse" role="tabpanel">
+                  <p>Here, you can customize intensity for each algorithm-miner pair. More options will be available as Hasher is updated. Use a single value to apply the same intensity to all your GPUs (e.g., <code>17.5</code>), or multiple values separated with a comma. For instance, <code>17.5,14</code> means GPU #0 will be affected <code>17.5</code> and GPU #1 <code>14</code>.<br>
+                  <small class="text-alert">If you experience crashes, shutdowns or if benchmark does not succeed for some algorithms (i.e. you obtain 0H/s), you may try to reduce their intensity.</small></p>
+                  <form class="form-inline intensity"></form>
+                </div>
+                <div class="tab-pane top-buffer" id="profitcollapse" role="tabpanel">
+                  <div class="form-group">
+                    <label for="check_frequency">Profit check frequency</label>
+                    <div class="input-group input-group-xs">
+                        <input type="text" id="check_frequency" class="form-control" aria-describedby="basic-addon1">
+                        <span class="input-group-addon" id="basic-addon1">mins</span>
+                    </div>
+                    <small class="text-alert errors" id="check_frequencyErr"></small>
+                  </div>
+                  <!-- <small class="text-alert">Setting this too low could lead to too frequent switches which are not optimal for mining, as miners usually need to build up somme speed. Setting it too high may make you miss some profit oportunities, so you have to find the right balance for you (default: 10mins).</small></p> -->
+
+                  <div class="form-group">
+                    <label for="smoothing">Smoothing</label>
+                    <div class="input-group input-group-xs">
+                        <input type="text" id="smoothing" class="form-control" aria-describedby="basic-addon1">
+                        <span class="input-group-addon" id="basic-addon1">%</span>
+                    </div>
+                    <small class="text-alert errors" id="smoothingErr"></small>
+                  </div>
+                  <!-- <small class="text-alert">In order to avoid continuously switching algorithms/pools (see above), the smoothing parameter can help. It defines how much better a new algorithm/pool needs to be in order to switch to it (default: 5%).</small></p> -->
+
+                  <div class="form-group">
+                    <label>Profit estimate</label>
+                    <div class="input-group">
+                      <div class="pestimate pretty p-default p-curve p-smooth p-fill">
+                          <input id="24h_actual" type="radio" name="estimate" />
+                          <div class="state p-primary">
+                              <label>Actual last 24h</label>
+                          </div>
+                      </div>
+                      <div class="pestimate pretty p-default p-curve p-smooth p-fill">
+                          <input id="estimate_last24h" type="radio" name="estimate"/>
+                          <div class="state p-primary">
+                              <label>Estimated last 24h</label>
+                          </div>
+                      </div>
+                      <div class="pestimate pretty p-default p-curve p-smooth p-fill">
+                          <input id="estimate_current" type="radio" name="estimate"/>
+                          <div class="state p-primary">
+                              <label>Current estimate</label>
+                          </div>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- <small class="text-alert">By default, Hasher uses the 24h actual exchange rate, which has been proven robust to estimate profit. Hasher still allows you to use other estimates, but be aware that the profit estimation becomes less stable - some pools might overestimate the value of some coins.</small></p> -->
+
+                </div>
+              </div>
             </div>
-            <div class="col-xs-12">
-              <button class="btn primary closeAdvanced">Save</button>
+            <div class="col-xs-12 top-buffer">
+              <button class="btn secondary closeAdvanced">Close</button>
             </div>
           </div>
         </div>
