@@ -7,7 +7,9 @@ const Store = require('electron-store');
 const store = new Store();
 const GPU = require("./controls/gpu.js");
 const gpu = new GPU();
+const utilities = require("./controls/utilities.js");
 const log = require('electron-log');
+log.transports.file.level = "info";
 
 let mainWindow;
 require('electron-debug')({showDevTools: config.debug});
@@ -17,7 +19,7 @@ if(config.debug) {
   autoUpdater.logger.transports.file.level = 'info';
 }
 
-log.info('App starting...');
+log.info('App starting...')
 
 // GUI ///////
 function createWindow () {

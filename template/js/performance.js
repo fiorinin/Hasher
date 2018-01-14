@@ -12,10 +12,10 @@ var spawn = require('child_process').spawn;
 const async = require('async');
 const MiningUtils = require("../../controls/miningutils.js");
 const Utils = require("../../controls/utilities.js");
+const log = require('electron-log');
 const mutils = new MiningUtils();
 var cancelBenchmark = false;
 var fse = require('fs-extra');
-const log = require('electron-log');
 
 // Some global settings
 var config = store.get("config");

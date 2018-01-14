@@ -1,10 +1,10 @@
 const Store = require('electron-store');
 const store = new Store();
 const utilities = require("./utilities.js");
+const log = require('electron-log');
 var config = store.get("config");
 var retry = require('requestretry');
 var request = require("request");
-const log = require('electron-log');
 
 module.exports = class MiningUtils {
   constructor() {}

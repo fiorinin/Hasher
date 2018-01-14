@@ -8,6 +8,7 @@ var spawn = require('child_process').spawn;
 const remote = require('electron').remote;
 const app = remote.app;
 const binPath = app.getPath('userData') +"/bin/";
+const utilities = require("../../controls/utilities.js");
 const log = require('electron-log');
 
 var config = store.get("config");
