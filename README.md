@@ -3,14 +3,16 @@ A simple yet comprehensive interface that benchmarks your hardware, downloads an
 
 ###### Licence GNU GPL v3.0: permissions of this strong copyleft license are conditioned on making available complete source code of licensed works and modifications, which include larger works using a licensed work, under the same license. Copyright and license notices must be preserved. Contributors provide an express grant of patent rights.
 
+<div style="text-align:center"><img src="https://raw.githubusercontent.com/Johy/Hasher/master/build/pictures/home.jpg" /></div>
+
 ## Features
 * Easy introduction and setup
 * Nice interface, more user-friendly than command files
 * Single window with all information at hand (hashrate, algo, pool, profit estimates and balances)
 * Multipool supported: zpool, aHashProol, HashRefinery and NiceHash - Hasher will mine on the most profitable pool
 * Benchmarking and miner comparison to pick the best one for each algo
-* More customization options (e.g., intensity) while still keeping it simple
-* Robust profit calculation - i.e. even when pool APIs are having troubles
+* More customization options (e.g., intensity, smoothing, profit check frequency) while still keeping it simple
+* Robust profit calculation - i.e. even when pool APIs are having troubles. The smoothing parameter also prevents switching algorithms/pools too frequently and thus allows building mining speed more effectively
 * Automatic updates: when a new version is released, it will be downloaded when you launch Hasher and installed when you quit it. No more time spent to check updates and copying files!
 * BTC address validation in setup, you can't enter a wrong address (because of your cat) anymore
 * It's free! There is a default donation of 1% - 14mins a day - that you can void (or increase...!)
