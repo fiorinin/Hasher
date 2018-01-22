@@ -97,7 +97,6 @@ function updateBTC(est) {
 }
 
 function checkProfit(callback) {
-  log.info('Checking profit');
   mutils.getMaxProfit(function(max_profit) {
     var instructions;
     for(var concat in enabled_algos) {
@@ -120,6 +119,7 @@ function checkProfit(callback) {
           // For switching we need more profit
           if(instructions === undefined || profit > instructions.profit) {
             instructions = mp;
+            instructions.hr = hr;
             instructions.alias = miner_alias;
             instructions.algo = algo;
             instructions.profit = profit;
@@ -253,8 +253,11 @@ function startMining(instructions, donate){
       checkProfit(function(new_instructions, miner) {
         var sw = false;
         // Does it suggest a different algo/pool? And is it at least smoothing% better than current?
-        if(new_instructions !== undefined && new_instructions.profit > instructions.profit*(1+smoothing/100) && (new_instructions.algo != instructions.algo || new_instructions["pid"] != instructions["pid"]))
-          sw = true;
+        log.info(`Current profit (last checked): ${instructions.algo} on pool ${instructions["pid"]} for ${instructions.profit}. At least ${instructions.profit*(1+smoothing/100)} needed for a switch.`)
+        log.info(`Best profit right now: ${new_instructions.algo} on pool ${new_instructions["pid"]} for ${new_instructions.profit}.`)
+        if(new_instructions !== undefined && new_instructions.profit > instructions.profit*(1+smoothing/100) && (new_instructions.algo != instructions.algo || new_instructions["pid"] != instructions["pid"])) {
+            sw = true;
+        }
         // If we decide to switch algos
         if(sw) {
           log.info('Profit switching');
@@ -276,8 +279,23 @@ function startMining(instructions, donate){
           mining.process.kill();
         }
         // We don't switch nor donate, so update current profit for future tests
+        // TODO: dirty fix, needs optimization
         else {
-          instructions.profit = new_instructions.profit;
+          mutils.getPoolData(instructions["pid"], function(err, algos) {
+            var pool = config.pools[instructions["pid"]];
+            var coin_unit = pool.coin_unit.default;
+            if (pool.coin_unit[instructions.algo] !== undefined) {
+              coin_unit = pool.coin_unit[instructions.algo];
+            }
+            // Find the pool's profit for the running algo
+            algos.forEach( function(obj) {
+              if(obj["algo"] == instructions.algo) {
+                instructions.profit = instructions.hr / coin_unit * obj[estimate] * pool.profit_multiplier;
+                instructions[estimate] = obj[estimate];
+                log.info(`Updating current profit to ${instructions.profit}.`)
+              }
+            });
+          })
         }
       });
     } else {

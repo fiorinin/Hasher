@@ -5,7 +5,8 @@ const remote = require('electron').remote;
 const app = remote.app;
 const binPath = app.getPath('userData') +"/bin/";
 var AdmZip = require('adm-zip');
-var _7z = require('7zip')['7z']
+require ('hazardous');
+var _7z = require('7zip')['7z'];
 var request = require('request');
 var fs   = require('fs');
 var spawn = require('child_process').spawn;
